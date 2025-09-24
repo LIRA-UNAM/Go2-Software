@@ -1,0 +1,42 @@
+<?xml version="1.0"?>
+<?xml-model href="http://download.ros.org/schema/package_format3.xsd" schematypens="http://www.w3.org/2001/XMLSchema"?>
+<package format="3">
+  <name>vision_pkg</name>
+  <version>0.1.0</version>
+  <description>Vision package (ROS 2, Python) — cámara 2D con OpenCV y cv_bridge</description>
+
+  <maintainer email="joel@example.com">Joel</maintainer> <!-- #TODO: tu email/nombre reales -->
+  <license>MIT</license> <!-- #TODO: elige tu licencia (MIT/BSD/etc.) -->
+
+  <!-- Núcleo ROS 2 (Python) -->
+  <depend>rclpy</depend>
+
+  <!-- Mensajes de imagen -->
+  <depend>sensor_msgs</depend>
+
+  <!-- Puente ROS<->OpenCV -->
+  <depend>cv_bridge</depend>
+
+  <!-- Transporte de imagen (compressed/raw/etc.) -->
+  <depend>image_transport</depend>
+
+  
+  <depend>object_classification</depend>
+
+  <!-- TF2 (opcional pero usual en visión para frames); quítalos si no los usarás -->
+  <depend>tf2</depend>
+  <depend>tf2_ros</depend>
+
+  <!-- (Opcional) std_msgs si publicas logs/flags simples -->
+  <!-- <depend>std_msgs</depend> -->
+
+  <!-- Tests opcionales -->
+  <test_depend>ament_copyright</test_depend>
+  <test_depend>ament_flake8</test_depend>
+  <test_depend>ament_pep257</test_depend>
+  <test_depend>python3-pytest</test_depend>
+
+  <export>
+    <build_type>ament_python</build_type>
+  </export>
+</package>
