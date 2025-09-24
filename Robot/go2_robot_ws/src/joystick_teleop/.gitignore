@@ -1,0 +1,15 @@
+# Ignore everything
+*
+# But these files
+!.gitignore
+!.gitattibutes
+!LICENSE
+!package.xml
+!readme.MD
+!setup.cfg
+!setup.py
+# And these directories
+!joystick_teleop/
+!resource/
+!scripts/
+!test/
