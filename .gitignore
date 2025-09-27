@@ -1,7 +1,6 @@
 PC/go2_ws/install
 PC/go2_ws/log
 PC/go2_ws/build
-PC/go2_ws/src/unitree_*/
 Robot/go2_robot_ws/install
 Robot/go2_robot_ws/log
 Robot/go2_robot_ws/build
