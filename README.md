@@ -33,6 +33,17 @@ cd ~/go2_robot_ws
 colcon build --symlink-install
 source install/setup.bash
 
+## build and install ydlidar sdk
+cd src/
+git clone https://github.com/YDLIDAR/YDLidar-SDK.git
+cd YDLidar-SDK
+mkdir build
+cd build
+cmake ..
+make
+sudo make install 
+
+
 # 3. Launch on the PC (main stack with RViz)
 ros2 launch surge_et_ambula go2_up.launch.py
 
