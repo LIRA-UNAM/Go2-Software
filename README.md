@@ -9,6 +9,7 @@ Execution is divided into two parts: **Local PC** (visualization and navigation)
 ## 🚀 Execution Steps
 
 ```bash
+# Configure a wired connection with IP 192.168.123.X, netmask 255.255.255.0 DGateway 192.168.123.1
 # 0. Connect to the robot via SSH
 ssh unitree@192.168.123.18
 # password: 123
