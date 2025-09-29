@@ -22,8 +22,10 @@ scp -r /path/to/repo/GO2/Robot unitree@192.168.123.18:/home/unitree/
 # 2. Build both workspaces
 
 ## On the local PC:
+Execute:
+./path/to/repo/PC/Setup.sh
 source /opt/ros/foxy/setup.bash
-cd ~/go2_ws
+cd /go2_ws
 colcon build --symlink-install
 source install/setup.bash
 
