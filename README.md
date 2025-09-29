@@ -1,8 +1,9 @@
 # Go2-Software
-Software for the Unitree Go2 quadruped robot
+Software for the Unitree Go2 quadruped robot 
 
 This repository contains the files required to control the **GO2** robot with ROS 2 Foxy.  
-Execution is divided into two parts: **Local PC** (visualization and navigation) and **Robot** (sensors and drivers).
+Execution is divided into two parts: **Local PC** (visualization and navigation) and **Robot** (sensors and drivers). 
+For more details refer to Robot/Mauricio/Go2 Quick Setup.pdf
 
 ---
 
