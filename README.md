@@ -44,7 +44,11 @@ mkdir build
 cd build
 cmake ..
 make
-sudo make install 
+sudo make install
+
+
+
+Note: It's necessary change the network interface inside gstreamer_image_publisher.py node.
 
 
 # 4. Launch on the PC (main stack with RViz)
