@@ -1,4 +1,6 @@
 from launch import LaunchDescription
+from launch.actions import DeclareLaunchArgument
+from launch.substitutions import LaunchConfiguration
 from launch_ros.actions import Node
 from ament_index_python.packages import get_package_share_directory
 import os
@@ -9,12 +11,28 @@ def generate_launch_description():
         get_package_share_directory('robot_description'),
         'urdf',
         'go2_description.urdf'
-    )
+        )
+
+    
+
 
     with open(urdf_file, 'r') as infp:
         robot_desc = infp.read()
 
+    # --- Argumento: ruta del mapa (yaml) ---
+    default_map = os.path.join(
+        get_package_share_directory('surge_et_ambula'),
+        'maps', 'lab', 'map.yaml'
+    )
+    map_config_file = LaunchConfiguration('map_config_file')
+
     return LaunchDescription([
+        # 1) Declarar el argumento (con valor por defecto)
+        DeclareLaunchArgument(
+            'map_config_file',
+            default_value=default_map,
+            description='Ruta absoluta al archivo YAML del mapa (Occupancy Grid)'
+        ),
         # Publicador del estado del robot
         Node(
             package='robot_state_publisher',
