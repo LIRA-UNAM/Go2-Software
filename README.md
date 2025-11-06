@@ -31,7 +31,7 @@ colcon build --symlink-install
 source install/setup.bash
 
 ## On the robot:
-ssh unitree@192.168.123.18 #Only if you are disconnected8 
+ssh unitree@192.168.123.18 #Only if you are disconnected 
 source /opt/ros/foxy/setup.bash
 cd ~/go2_robot_ws
 colcon build --symlink-install
