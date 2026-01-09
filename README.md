@@ -55,4 +55,4 @@ Note: It's necessary change the network interface inside gstreamer_image_publish
 ros2 launch surge_et_ambula go2_up.launch.py
 
 # 4. Launch on the robot (LiDAR driver)
-ros2 launch ydlidar_ros_driver ydlidar_launch.py
+ros2 launch ydlidar_ros2_driver ydlidar_launch.py
