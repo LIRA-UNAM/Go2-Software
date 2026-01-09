@@ -1,0 +1,33 @@
+#docker pull ghcr.io/jdgag0/unitree_project/go2:2.0
+version: "3.9"
+
+services:
+  Go2:
+    image: ghcr.io/jdgag0/unitree_project/go2:2.0
+    container_name: Go2_2.0
+    restart: unless-stopped
+    network_mode: "host"
+    privileged: true
+    environment:
+      - DISPLAY=${DISPLAY}
+      - PULSE_SERVER=unix:/run/user/1000/pulse/native  #ruta real de PulseAudio del host
+      - NVIDIA_DRIVER_CAPABILITIES=all
+      - NVIDIA_VISIBLE_DEVICES=all
+    volumes:
+      - /tmp/.X11-unix:/tmp/.X11-unix
+      - /home/joel/unitree:/home/unitree  # Carpeta persistente única
+      - /dev:/dev
+      - /etc/hosts:/etc/hosts
+      - ${XDG_RUNTIME_DIR}/pulse:/run/user/1000/pulse  # monta donde realmente está el socket
+      - ~/.config/pulse:/root/.config/pulse
+    group_add:
+      - audio
+      - input
+      - dialout
+    stdin_open: true
+    tty: true
+    runtime: nvidia
+   devices:
+      - "/dev:/dev"
+    command: bash
+
