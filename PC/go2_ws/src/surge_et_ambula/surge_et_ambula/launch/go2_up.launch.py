@@ -27,7 +27,7 @@ def generate_launch_description():
 
     # Ruta del URDF
     urdf_file = os.path.join(
-        get_package_share_directory('robot_description'),
+        get_package_share_directory('go2_description'),
         'urdf',
         'go2_description.urdf'
     )
@@ -41,7 +41,7 @@ def generate_launch_description():
 
         # ---------------- NODOS ORIGINALES ----------------
         Node(
-            package='robot_description',  # reemplaza si aplica
+            package='go2_description',
             executable='joint_state_relay',
             name='joint_state_relay',
             output='screen'

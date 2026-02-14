@@ -27,7 +27,7 @@ services:
     stdin_open: true
     tty: true
     runtime: nvidia
-   devices:
+    devices:
       - "/dev:/dev"
     command: bash
 

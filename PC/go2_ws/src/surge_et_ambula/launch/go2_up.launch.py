@@ -8,7 +8,7 @@ import os
 def generate_launch_description():
     # Ruta del URDF
     urdf_file = os.path.join(
-        get_package_share_directory('robot_description'),
+        get_package_share_directory('go2_description'),
         'urdf',
         'go2_description.urdf'
         )
@@ -43,7 +43,7 @@ def generate_launch_description():
 
         # GUI para mover articulaciones
         Node(
-            package='robot_description',
+            package='go2_description',
             executable='joint_state_publisher_gui',
             name='joint_state_publisher_gui',
             output='screen'

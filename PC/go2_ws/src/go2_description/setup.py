@@ -2,7 +2,7 @@ import os
 from glob import glob
 from setuptools import setup
 
-package_name = 'robot_description'
+package_name = 'go2_description'
 
 setup(
     name=package_name,
@@ -33,7 +33,7 @@ setup(
     tests_require=['pytest'],
     entry_points={
         'console_scripts': [
-	    'joint_state_relay = robot_description.joint_state_relay:main',
+    	'joint_state_relay = go2_description.joint_state_relay:main',
         ],
     },
 )

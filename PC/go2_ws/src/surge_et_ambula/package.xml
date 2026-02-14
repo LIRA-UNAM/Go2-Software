@@ -28,7 +28,7 @@
   <exec_depend>nav2_lifecycle_manager</exec_depend>
 
   <!-- Opcionales, si realmente los invocas en el launch -->
-  <exec_depend>robot_description</exec_depend>
+  <exec_depend>go2_description</exec_depend>
   <exec_depend>joystick_teleop</exec_depend>
   <exec_depend>my_go2_launch</exec_depend>
 

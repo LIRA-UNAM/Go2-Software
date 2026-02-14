@@ -1,0 +1,162 @@
+Starting >>> go2_description
+Starting >>> joystick_teleop
+Starting >>> my_go2_launch
+Starting >>> object_classification
+Starting >>> g1
+Starting >>> rf2o_laser_odometry
+Starting >>> unitree_api
+Starting >>> unitree_go
+Starting >>> unitree_hg
+/usr/local/lib/python3.8/dist-packages/setuptools/dist.py:495: SetuptoolsDeprecationWarning: Invalid dash-separated options
+!!
+
+        ********************************************************************************
+        Usage of dash-separated 'script-dir' will not be supported in future
+        versions. Please use the underscore name 'script_dir' instead.
+
+        This deprecation is overdue, please update your project and remove deprecated
+        calls to avoid build errors in the future.
+
+        See https://setuptools.pypa.io/en/latest/userguide/declarative_config.html for details.
+        ********************************************************************************
+
+!!
+  opt = self.warn_dash_deprecation(opt, section)
+/usr/local/lib/python3.8/dist-packages/setuptools/dist.py:495: SetuptoolsDeprecationWarning: Invalid dash-separated options
+!!
+
+        ********************************************************************************
+        Usage of dash-separated 'install-scripts' will not be supported in future
+        versions. Please use the underscore name 'install_scripts' instead.
+
+        This deprecation is overdue, please update your project and remove deprecated
+        calls to avoid build errors in the future.
+
+        See https://setuptools.pypa.io/en/latest/userguide/declarative_config.html for details.
+        ********************************************************************************
+
+!!
+  opt = self.warn_dash_deprecation(opt, section)
+/usr/local/lib/python3.8/dist-packages/setuptools/_distutils/dist.py:261: UserWarning: Unknown distribution option: 'tests_require'
+  warnings.warn(msg)
+/usr/local/lib/python3.8/dist-packages/setuptools/dist.py:495: SetuptoolsDeprecationWarning: Invalid dash-separated options
+!!
+
+        ********************************************************************************
+        Usage of dash-separated 'script-dir' will not be supported in future
+        versions. Please use the underscore name 'script_dir' instead.
+
+        This deprecation is overdue, please update your project and remove deprecated
+        calls to avoid build errors in the future.
+
+        See https://setuptools.pypa.io/en/latest/userguide/declarative_config.html for details.
+        ********************************************************************************
+
+!!
+  opt = self.warn_dash_deprecation(opt, section)
+/usr/local/lib/python3.8/dist-packages/setuptools/dist.py:495: SetuptoolsDeprecationWarning: Invalid dash-separated options
+!!
+
+        ********************************************************************************
+        Usage of dash-separated 'install-scripts' will not be supported in future
+        versions. Please use the underscore name 'install_scripts' instead.
+
+        This deprecation is overdue, please update your project and remove deprecated
+        calls to avoid build errors in the future.
+
+        See https://setuptools.pypa.io/en/latest/userguide/declarative_config.html for details.
+        ********************************************************************************
+
+!!
+  opt = self.warn_dash_deprecation(opt, section)
+/usr/local/lib/python3.8/dist-packages/setuptools/_distutils/dist.py:261: UserWarning: Unknown distribution option: 'tests_require'
+  warnings.warn(msg)
+/usr/local/lib/python3.8/dist-packages/setuptools/dist.py:495: SetuptoolsDeprecationWarning: Invalid dash-separated options
+!!
+
+        ********************************************************************************
+        Usage of dash-separated 'script-dir' will not be supported in future
+        versions. Please use the underscore name 'script_dir' instead.
+
+        This deprecation is overdue, please update your project and remove deprecated
+        calls to avoid build errors in the future.
+
+        See https://setuptools.pypa.io/en/latest/userguide/declarative_config.html for details.
+        ********************************************************************************
+
+!!
+  opt = self.warn_dash_deprecation(opt, section)
+/usr/local/lib/python3.8/dist-packages/setuptools/dist.py:495: SetuptoolsDeprecationWarning: Invalid dash-separated options
+!!
+
+        ********************************************************************************
+        Usage of dash-separated 'install-scripts' will not be supported in future
+        versions. Please use the underscore name 'install_scripts' instead.
+
+        This deprecation is overdue, please update your project and remove deprecated
+        calls to avoid build errors in the future.
+
+        See https://setuptools.pypa.io/en/latest/userguide/declarative_config.html for details.
+        ********************************************************************************
+
+!!
+  opt = self.warn_dash_deprecation(opt, section)
+/usr/local/lib/python3.8/dist-packages/setuptools/_distutils/dist.py:261: UserWarning: Unknown distribution option: 'tests_require'
+  warnings.warn(msg)
+/usr/local/lib/python3.8/dist-packages/setuptools/dist.py:495: SetuptoolsDeprecationWarning: Invalid dash-separated options
+!!
+
+        ********************************************************************************
+        Usage of dash-separated 'script-dir' will not be supported in future
+        versions. Please use the underscore name 'script_dir' instead.
+
+        This deprecation is overdue, please update your project and remove deprecated
+        calls to avoid build errors in the future.
+
+        See https://setuptools.pypa.io/en/latest/userguide/declarative_config.html for details.
+        ********************************************************************************
+
+!!
+  opt = self.warn_dash_deprecation(opt, section)
+/usr/local/lib/python3.8/dist-packages/setuptools/dist.py:495: SetuptoolsDeprecationWarning: Invalid dash-separated options
+!!
+
+        ********************************************************************************
+        Usage of dash-separated 'install-scripts' will not be supported in future
+        versions. Please use the underscore name 'install_scripts' instead.
+
+        This deprecation is overdue, please update your project and remove deprecated
+        calls to avoid build errors in the future.
+
+        See https://setuptools.pypa.io/en/latest/userguide/declarative_config.html for details.
+        ********************************************************************************
+
+!!
+  opt = self.warn_dash_deprecation(opt, section)
+/usr/local/lib/python3.8/dist-packages/setuptools/_distutils/dist.py:261: UserWarning: Unknown distribution option: 'tests_require'
+  warnings.warn(msg)
+--- stderr: rf2o_laser_odometry
+In file included from /home/unitree/Go2-Software/PC/go2_ws/src/rf2o_laser_odometry/src/CLaserOdometry2DNode.cpp:18:
+/home/unitree/Go2-Software/PC/go2_ws/src/rf2o_laser_odometry/include/rf2o_laser_odometry/CLaserOdometry2DNode.hpp:9:10: fatal error: tf2_geometry_msgs/tf2_geometry_msgs.hpp: No such file or directory
+    9 | #include <tf2_geometry_msgs/tf2_geometry_msgs.hpp>
+      |          ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+compilation terminated.
+make[2]: *** [CMakeFiles/rf2o_laser_odometry_node.dir/build.make:63: CMakeFiles/rf2o_laser_odometry_node.dir/src/CLaserOdometry2DNode.cpp.o] Error 1
+make[1]: *** [CMakeFiles/Makefile2:134: CMakeFiles/rf2o_laser_odometry_node.dir/all] Error 2
+make: *** [Makefile:141: all] Error 2
+---
+Failed   <<< rf2o_laser_odometry [0.84s, exited with code 2]
+Aborted  <<< unitree_api [0.84s]
+Aborted  <<< unitree_go [0.83s]
+Aborted  <<< unitree_hg [0.82s]
+Aborted  <<< object_classification [0.89s]
+Aborted  <<< joystick_teleop [0.97s]
+Aborted  <<< go2_description [0.99s]
+Aborted  <<< my_go2_launch [0.97s]
+Aborted  <<< g1 [0.96s]
+
+Summary: 0 packages finished [1.09s]
+  1 package failed: rf2o_laser_odometry
+  8 packages aborted: g1 go2_description joystick_teleop my_go2_launch object_classification unitree_api unitree_go unitree_hg
+  1 package had stderr output: rf2o_laser_odometry
+  2 packages not processed

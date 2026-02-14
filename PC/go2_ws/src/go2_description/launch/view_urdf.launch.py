@@ -5,7 +5,7 @@ import os
 
 def generate_launch_description():
     urdf_file = os.path.join(
-        get_package_share_directory('robot_description'),
+        get_package_share_directory('go2_description'),
         'urdf',
         'go2_description.urdf'
     )

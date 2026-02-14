@@ -10,7 +10,7 @@ def generate_launch_description():
         DeclareLaunchArgument(
             'urdf_file',
             default_value='go2_description.urdf',
-            description='/home/unitree/ros2_ws/src/robot_description/urdf/go2_description.urdf'
+            description='/home/unitree/ros2_ws/src/go2_description/urdf/go2_description.urdf'
         ),
         Node(
             package='robot_state_publisher',
