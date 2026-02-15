@@ -46,8 +46,18 @@ def generate_launch_description():
         output='screen'
     )
 
+    # Bridge cmd_vel -> Unitree Sport API (hace que el robot camine)
+    dogbase_node = Node(
+        package='go2_demo',
+        executable='dogbase',
+        name='dog_base_node',
+        output='screen',
+        emulate_tty=True
+    )
+
     return LaunchDescription([
         params_declare,
         driver_node,
-        joy_node
+        joy_node,
+        dogbase_node
     ])

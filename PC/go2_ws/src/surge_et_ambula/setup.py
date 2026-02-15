@@ -20,9 +20,11 @@ setup(
          glob('surge_et_ambula/launch/*.launch.py')),
 
         # --- Recursos que quieres compartir/instalar ---
-        # Carpeta con mapas (ajusta el nombre si usas 'maps' en vez de 'lab')
-        ('share/' + package_name + '/maps',
+        # Mapas: cada subcarpeta (lab, my_house, etc.) se instala preservando la estructura
+        ('share/' + package_name + '/maps/lab',
          glob('maps/lab/*')),
+        ('share/' + package_name + '/maps/my_house',
+         glob('maps/my_house/*')),
 
         # (OPCIONAL) otras carpetas de recursos si existen:
         # ('share/' + package_name + '/urdf',   glob('urdf/*')),

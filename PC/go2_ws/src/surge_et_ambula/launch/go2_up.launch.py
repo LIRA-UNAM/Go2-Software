@@ -1,11 +1,13 @@
 from launch import LaunchDescription
 from launch.actions import DeclareLaunchArgument
-from launch.substitutions import LaunchConfiguration
+from launch.substitutions import LaunchConfiguration, PathJoinSubstitution, TextSubstitution
 from launch_ros.actions import Node
 from ament_index_python.packages import get_package_share_directory
 import os
 
 def generate_launch_description():
+    pkg_share = get_package_share_directory('surge_et_ambula')
+
     # Ruta del URDF
     urdf_file = os.path.join(
         get_package_share_directory('go2_description'),
@@ -13,25 +15,23 @@ def generate_launch_description():
         'go2_description.urdf'
         )
 
-    
-
-
     with open(urdf_file, 'r') as infp:
         robot_desc = infp.read()
 
-    # --- Argumento: ruta del mapa (yaml) ---
-    default_map = os.path.join(
-        get_package_share_directory('surge_et_ambula'),
-        'maps', 'lab', 'map.yaml'
-    )
-    map_config_file = LaunchConfiguration('map_config_file')
+    # --- Argumento: subcarpeta del mapa (lab, my_house, etc.) ---
+    map_name = LaunchConfiguration('map_name')
+    map_config_file = PathJoinSubstitution([
+        TextSubstitution(text=pkg_share),
+        TextSubstitution(text='maps'),
+        map_name,
+        TextSubstitution(text='map.yaml')
+    ])
 
     return LaunchDescription([
-        # 1) Declarar el argumento (con valor por defecto)
         DeclareLaunchArgument(
-            'map_config_file',
-            default_value=default_map,
-            description='Ruta absoluta al archivo YAML del mapa (Occupancy Grid)'
+            'map_name',
+            default_value='my_house',
+            description='Lugar del mapa.'
         ),
         # Publicador del estado del robot
         Node(
@@ -64,7 +64,7 @@ def generate_launch_description():
             name='gstreamer_image_publisher',
             output='screen',
             parameters=[{
-                'gstreamer_pipeline': "udpsrc address=230.1.1.1 port=1720 multicast-iface=enx207bd2565bdb ! "
+                'gstreamer_pipeline': "udpsrc address=230.1.1.1 port=1720 multicast-iface=enx6c1ff767936e ! "
                                        "application/x-rtp, media=video, encoding-name=H264 ! "
                                        "rtph264depay ! h264parse ! avdec_h264 ! videoconvert ! "
                                        "video/x-raw,width=1280,height=720,format=BGR ! appsink drop=1",
@@ -80,7 +80,7 @@ def generate_launch_description():
             output='screen',
             parameters=[{
                 'target_frame': 'odom',
-                'transform_tolerance': 0.01,
+                'transform_tolerance': 1.0,
                 'min_height': 0.2,
                 'max_height': 0.5,
                 'angle_min': -3.14,

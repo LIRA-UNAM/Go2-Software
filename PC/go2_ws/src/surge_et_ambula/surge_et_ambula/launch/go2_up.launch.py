@@ -2,28 +2,20 @@ from launch import LaunchDescription
 from launch_ros.actions import Node
 from ament_index_python.packages import get_package_share_directory
 from launch.actions import DeclareLaunchArgument
-from launch.substitutions import LaunchConfiguration
+from launch.substitutions import LaunchConfiguration, PathJoinSubstitution, TextSubstitution
 import os
 
 def generate_launch_description():
-    # --- Arg: mapa YAML ---
-    map_config_file = LaunchConfiguration(
-        'map_config_file',
-        default=os.path.join(
-            get_package_share_directory('surge_et_ambula'),
-            'maps',
-            'map.yaml'
-        )
-    )
+    pkg_share = get_package_share_directory('surge_et_ambula')
 
-    # map_config_file = LaunchConfiguration(
-    #     'prohibition_map_config_file',
-    #     default=os.path.join(
-    #         get_package_share_directory('surge_et_ambula'),
-    #         'maps',
-    #         'prohibition_map.yaml'
-    #     )
-    # )
+    # --- Arg: subcarpeta del mapa (lab, my_house, etc.) ---
+    map_name = LaunchConfiguration('map_name')
+    map_config_file = PathJoinSubstitution([
+        TextSubstitution(text=pkg_share),
+        TextSubstitution(text='maps'),
+        map_name,
+        TextSubstitution(text='map.yaml')
+    ])
 
     # Ruta del URDF
     urdf_file = os.path.join(
@@ -36,8 +28,12 @@ def generate_launch_description():
         robot_desc = infp.read()
 
     return LaunchDescription([
-        # Exponer el arg en línea de comandos
-        DeclareLaunchArgument('map_config_file', default_value=map_config_file),
+        # Subcarpeta del mapa: lab, my_house, etc. (debe existir en maps/<map_name>/)
+        DeclareLaunchArgument(
+            'map_name',
+            default_value='my_house',
+            description='Subcarpeta del mapa: lab, my_house, etc.'
+        ),
 
         # ---------------- NODOS ORIGINALES ----------------
         Node(

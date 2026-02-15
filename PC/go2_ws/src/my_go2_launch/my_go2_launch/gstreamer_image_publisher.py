@@ -13,7 +13,7 @@ class GStreamerImagePublisher(Node):
         # Parámetros configurables
         self.declare_parameter("multicast_address", "230.1.1.1")
         self.declare_parameter("port", 1720)
-        self.declare_parameter("multicast_iface", "enx207bd2565bdb")
+        self.declare_parameter("multicast_iface", "enx6c1ff767936e")
         self.declare_parameter("width", 1280)
         self.declare_parameter("height", 720)
         self.declare_parameter("topic_name", "/camera/image_raw")

@@ -33,7 +33,8 @@ source install/setup.bash
 ## On the robot:
 ssh unitree@192.168.123.18 #Only if you are disconnected 
 source /opt/ros/foxy/setup.bash
-cd ~/go2_robot_ws
+cd ~/go2_robot_ws   # o cd ~/Robot/go2_robot_ws si copiaste la carpeta Robot
+colcon list         # verifica que aparezca go2_demo (debe haber 5 paquetes)
 colcon build --symlink-install
 source install/setup.bash
 
@@ -54,5 +55,6 @@ Note: It's necessary change the network interface inside gstreamer_image_publish
 # 4. Launch on the PC (main stack with RViz)
 ros2 launch surge_et_ambula go2_up.launch.py
 
-# 4. Launch on the robot (LiDAR driver)
+# 5. Launch on the robot (LiDAR + cmd_vel bridge)
 ros2 launch ydlidar_ros2_driver ydlidar_launch.py
+
