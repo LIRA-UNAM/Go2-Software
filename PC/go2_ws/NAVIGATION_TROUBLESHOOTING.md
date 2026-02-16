@@ -136,7 +136,13 @@ Ajusta segun la posicion real del robot en el mapa. Si la pose es incorrecta, us
   ```
   (Ctrl+C en `topic echo` tras ver un mensaje; Foxy no soporta `-n 1`). Si `/odom_rf2o_raw` no tiene Hz, RF2O no publica (revisa `/scan`). Si `odom_filter` no aparece en node list, el nodo no arrancó.
 
-### 19. **Pose inicial en EMCL2**
+### 19. **Patas no se ven con Fixed Frame map/odom** (solo tronco)
+- **Síntoma:** Con Fixed Frame = base_link se ven las patas; con map u odom solo el tronco.
+- **Causa:** Timestamps incoherentes cuando joint_state_relay y robot_state_publisher corrían en el robot (reloj distinto al PC).
+- **Corrección aplicada:** `joint_state_relay` y `robot_state_publisher` se ejecutan en el **PC** (go2_robot_model.launch.py). Toda la cadena TF (odom→base_link→base→patas) se publica desde el PC con el mismo reloj.
+- **Requisito:** El workspace del PC incluye `unitree_go` (symlink) y `go2_description` (copia) desde el Robot. Compilar con `colcon build --symlink-install` en el PC.
+
+### 20. **Pose inicial en EMCL2**
 Si el robot no localiza bien, define la pose inicial en el mapa. En `go2_navigation.launch.xml` puedes añadir parámetros al nodo emcl2:
 ```xml
 <param name="initial_pose_x" value="0.0"/>

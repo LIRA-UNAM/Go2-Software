@@ -23,7 +23,7 @@ class OdomToTF(Node):
 
     def odom_callback(self, msg: Odometry):
         t = TransformStamped()
-        t.header.stamp = self.get_clock().now().to_msg()
+        t.header.stamp = msg.header.stamp
         t.header.frame_id = msg.header.frame_id if msg.header.frame_id else 'odom'
         t.child_frame_id = msg.child_frame_id if msg.child_frame_id else 'base_link'
 

@@ -2,10 +2,13 @@
 
   <!-- ============================================================ -->
   <!-- Go2 Navigation con AMCL (odom del robot via /utlidar/robot_odom) -->
-  <!-- Requiere: Robot con go2_up (surge_et_ambula) - publica /map y /fixed_prohibition_layer_map -->
-  <!-- PC: odom_publisher, AMCL, planificacion - se suscribe a los mapas del robot -->
+  <!-- Requiere: Robot con go2_up (surge_et_ambula) - publica /map, /lowstate, /scan, /utlidar/robot_odom -->
+  <!-- PC: go2_robot_model, odom_publisher, AMCL, planificacion -->
   <!-- Para RF2O: go2_navigation_amcl_rf2o.launch.xml                -->
   <!-- ============================================================ -->
+
+  <!-- Robot model en PC: joint_state_relay, robot_state_publisher, TF base_link->base->laser_frame -->
+  <include file="$(find-pkg-share my_go2_launch)/launch/go2_robot_model.launch.py"/>
 
   <!-- odom_publisher: /utlidar/robot_odom -> TF odom->base_link (robot no publica TF) -->
   <node name="odom_to_tf_broadcaster"
@@ -77,6 +80,7 @@
     <param name="pf_err" value="0.1"/>
     <param name="laser_model_type" value="likelihood_field"/>
     <param name="max_beams" value="90"/>
+    <param name="transform_tolerance" value="2.0"/>
   </node>
 
   <node name="lifecycle_manager_map"

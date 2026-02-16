@@ -27,6 +27,7 @@ Execute:
 ./path/to/repo/PC/Setup.sh
 source /opt/ros/foxy/setup.bash
 cd path/to/repo/PC/go2_ws
+# El workspace incluye unitree_go (symlink) y go2_description para el árbol TF en PC
 colcon build --symlink-install
 source install/setup.bash
 

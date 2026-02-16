@@ -2,9 +2,12 @@
 
   <!-- ============================================================ -->
   <!-- Go2 Navigation con AMCL + RF2O (odometria desde /scan YDLidar) -->
-  <!-- Requiere: Robot con go2_up (surge_et_ambula) - publica /map y /fixed_prohibition_layer_map -->
-  <!-- PC: navegación (RF2O, odom_filter, AMCL) - se suscribe a los mapas del robot -->
+  <!-- Requiere: Robot con go2_up (surge_et_ambula) - publica /map, /lowstate, /scan, /utlidar/robot_odom -->
+  <!-- PC: go2_robot_model, RF2O, odom_filter, AMCL, planificacion -->
   <!-- ============================================================ -->
+
+  <!-- Robot model en PC: joint_state_relay, robot_state_publisher, TF base_link->base->laser_frame -->
+  <include file="$(find-pkg-share my_go2_launch)/launch/go2_robot_model.launch.py"/>
 
   <arg name="use_sim_time" default="false"/>
   <arg name="initial_pose_x" default="0.0"/>

@@ -1,6 +1,7 @@
 """
-go2_up: bringup completo del robot (ydlidar, TF, joint_state, joystick, cámara, mapas).
-Se ejecuta en el ROBOT. Publica /map, /fixed_prohibition_layer_map y /robot_description.
+go2_up: bringup del robot (ydlidar, dogbase, joystick, cámara, mapas).
+Se ejecuta en el ROBOT. Publica /map, /fixed_prohibition_layer_map, /lowstate, /scan, /utlidar/robot_odom.
+joint_state_relay, robot_state_publisher y TF base_link->base->laser_frame se ejecutan en el PC (go2_robot_model).
 """
 from launch import LaunchDescription
 from launch_ros.actions import Node
@@ -15,14 +16,6 @@ import os
 def generate_launch_description():
     surge_share = get_package_share_directory('surge_et_ambula')
     map_name = LaunchConfiguration('map_name', default='my_house')
-
-    urdf_file = os.path.join(
-        get_package_share_directory('go2_description'),
-        'urdf',
-        'go2_description.urdf'
-    )
-    with open(urdf_file, 'r') as infp:
-        robot_desc = infp.read()
 
     ydlidar_launch = os.path.join(
         get_package_share_directory('ydlidar_ros2_driver'),
@@ -41,52 +34,15 @@ def generate_launch_description():
             default_value='false',
             description='Robot suele ser headless. true solo si tiene pantalla.'
         ),
-        DeclareLaunchArgument(
-            'launch_camera',
-            default_value='false',
-            description='Lanzar img_publisher (cámara GStreamer). true solo si la cámara multicast funciona.'
-        ),
-        # Lidar, joy_node, dogbase (publica /lowstate, /scan; recibe /cmd_vel)
+        # Lidar, joy_node, dogbase (publica /lowstate, /scan, /utlidar/robot_odom; recibe /cmd_vel)
         IncludeLaunchDescription(
             PythonLaunchDescriptionSource(ydlidar_launch)
-        ),
-
-        Node(
-            package='go2_description',
-            executable='joint_state_relay',
-            name='joint_state_relay',
-            output='screen',
-            parameters=[{'lowstate_topic': '/lowstate'}]
-        ),
-
-        Node(
-            package='robot_state_publisher',
-            executable='robot_state_publisher',
-            name='robot_state_publisher',
-            output='screen',
-            parameters=[{'robot_description': robot_desc}]
         ),
 
         Node(
             package='joystick_teleop',
             executable='joystick_teleop',
             name='joystick_teleop',
-        ),
-
-        Node(
-            package='tf2_ros',
-            executable='static_transform_publisher',
-            name='baselink_to_base_broadcaster',
-            output='screen',
-            arguments=['0', '0', '0', '0', '0', '0', 'base_link', 'base']
-        ),
-
-        Node(
-            package='tf2_ros',
-            executable='static_transform_publisher',
-            name='static_tf_pub_laser',
-            output='screen',
-            arguments=['-0.15', '0', '0.05', '0', '3.14', '0', 'Head_upper', 'laser_frame']
         ),
 
         Node(
@@ -102,7 +58,6 @@ def generate_launch_description():
             executable='img_publisher',
             name='img_publisher',
             output='screen',
-            condition=IfCondition(LaunchConfiguration('launch_camera')),
             additional_env={'LD_PRELOAD': '/lib/aarch64-linux-gnu/libgomp.so.1'},
             parameters=[{
                 'gstreamer_pipeline': (
