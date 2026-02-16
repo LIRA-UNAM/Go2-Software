@@ -1,5 +1,6 @@
 from launch import LaunchDescription
 from launch_ros.actions import Node
+from launch.conditions import IfCondition, UnlessCondition
 from ament_index_python.packages import get_package_share_directory
 from launch.actions import DeclareLaunchArgument
 from launch.substitutions import LaunchConfiguration, PathJoinSubstitution, TextSubstitution
@@ -34,6 +35,11 @@ def generate_launch_description():
             default_value='my_house',
             description='Subcarpeta del mapa: lab, my_house, etc.'
         ),
+        DeclareLaunchArgument(
+            'use_rf2o_odom',
+            default_value='false',
+            description='Si true, no lanzar odom_publisher (usar go2_navigation_amcl_rf2o con RF2O). Si false, usar odom del robot (go2_navigation_amcl).'
+        ),
 
         # ---------------- NODOS ORIGINALES ----------------
         Node(
@@ -62,6 +68,7 @@ def generate_launch_description():
             executable='odom_publisher',
             name='odom_to_tf_broadcaster',
             output='screen',
+            condition=UnlessCondition(LaunchConfiguration('use_rf2o_odom')),
         ),
 
         Node(

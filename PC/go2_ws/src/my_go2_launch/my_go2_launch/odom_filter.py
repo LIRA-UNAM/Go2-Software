@@ -95,7 +95,7 @@ class OdomFilterNode(Node):
                      math.atan2(2.0 * (msg.pose.pose.orientation.w * msg.pose.pose.orientation.z +
                               msg.pose.pose.orientation.x * msg.pose.pose.orientation.y),
                                1.0 - 2.0 * (msg.pose.pose.orientation.y ** 2 +
-                                        msg.pose.pose.orientation.z ** 2))))
+                                        msg.pose.pose.orientation.z ** 2)))
 
     def _publish(self, msg, x, y, yaw):
         msg.header.frame_id = self.odom_frame
@@ -104,7 +104,7 @@ class OdomFilterNode(Node):
         self.pub.publish(msg)
 
         t = TransformStamped()
-        t.header.stamp = msg.header.stamp
+        t.header.stamp = self.get_clock().now().to_msg()
         t.header.frame_id = self.odom_frame
         t.child_frame_id = self.base_frame
         t.transform.translation.x = x

@@ -1,13 +1,15 @@
 <launch>
 
   <!-- ============================================================ -->
-  <!-- Go2 Navigation con AMCL de go2_up (sin RF2O/odom_filter)     -->
+  <!-- Go2 Navigation con AMCL de go2_up (odom del robot)           -->
   <!-- Requiere lanzar ANTES:                                        -->
-  <!--   Robot: ros2 launch ydlidar_ros2_driver ydlidar_launch.py  -->
+  <!--   Robot: ros2 launch ydlidar_ros2_driver ydlidar_launch.py   -->
+  <!--         publish_tf:=true  (odom desde dogbase)               -->
   <!--   PC:    ros2 launch surge_et_ambula go2_up.launch.py        -->
+  <!--         use_rf2o_odom:=false (por defecto)                    -->
   <!--                                                              -->
-  <!-- Usa odometria del robot (odom_publisher) y AMCL de go2_up.   -->
-  <!-- Evita el error de odom_filter.py y el drift de RF2O.         -->
+  <!-- Usa odometria del robot (odom_publisher). Para RF2O usar     -->
+  <!-- go2_navigation_amcl_rf2o.launch.xml                           -->
   <!-- ============================================================ -->
 
   <arg name="use_sim_time" default="false"/>

@@ -30,11 +30,7 @@ Panels:
       - /Current View1
     Name: Views
     Splitter Ratio: 0.5
-  - Class: rviz_common/Time
-    Experimental: false
-    Name: Time
-    SyncMode: 0
-    SyncSource: LaserScan
+  # Panel Time (rviz_common/Time) no existe en Foxy - removido para evitar error de carga
 Visualization Manager:
   Class: ""
   Displays:

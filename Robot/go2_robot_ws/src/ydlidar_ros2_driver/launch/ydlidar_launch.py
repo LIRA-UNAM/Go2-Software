@@ -31,8 +31,8 @@ def generate_launch_description():
 
     publish_tf_arg = DeclareLaunchArgument(
         'publish_tf',
-        default_value='true',
-        description='Si false, dogbase no publica odom->base_link (usar con go2_navigation para evitar robot errático).'
+        default_value='false',
+        description='Si true, dogbase publica odom->base_link (solo para go2_navigation_amcl con odom robot). Si false, usar RF2O (go2_navigation_amcl_rf2o).'
     )
 
     driver_node = LifecycleNode(
