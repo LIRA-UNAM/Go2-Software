@@ -62,6 +62,7 @@ public:
         this->declare_parameter<float>("fine_dist_tolerance",   0.03f);
         this->declare_parameter<float>("coarse_dist_tolerance", 0.2f);
         this->declare_parameter<float>("angle_tolerance",       0.05f);
+        this->declare_parameter<float>("goal_timeout",           60.0f);
 
         this->declare_parameter<bool>("move_head", true);
         this->declare_parameter<bool>("use_pot_fields", false);
@@ -80,6 +81,7 @@ public:
         this->get_parameter("fine_dist_tolerance",   fine_dist_tolerance_);
         this->get_parameter("coarse_dist_tolerance", coarse_dist_tolerance_);
         this->get_parameter("angle_tolerance",       angle_tolerance_);
+        this->get_parameter("goal_timeout",          goal_timeout_);
 
         this->get_parameter("move_head",             move_head_);
         this->get_parameter("use_pot_fields",        use_pot_fields_);
@@ -203,6 +205,7 @@ private:
     float fine_dist_tolerance_;
     float coarse_dist_tolerance_;
     float angle_tolerance_;
+    float goal_timeout_;
 
     bool move_head_;
     bool use_pot_fields_;
@@ -274,6 +277,7 @@ private:
             else if (param.get_name() == "fine_dist_tolerance")   fine_dist_tolerance_     = param.as_double();
             else if (param.get_name() == "coarse_dist_tolerance") coarse_dist_tolerance_   = param.as_double();
             else if (param.get_name() == "angle_tolerance")       angle_tolerance_         = param.as_double();
+            else if (param.get_name() == "goal_timeout")          goal_timeout_            = param.as_double();
 
             else if (param.get_name() == "move_head")             move_head_               = param.as_bool();
             else if (param.get_name() == "use_pot_fields")        use_pot_fields_          = param.as_bool();
@@ -730,7 +734,7 @@ private:
                     state = SM_GOAL_POSE_ACCEL;
                     new_pose_ = false;
                     msg_goal_reached.goal_id.id = "-1";
-                    attempts = (int)((fabs(goal_distance_)*5)/max_linear_speed_*RATE + fabs(goal_angle_*5)/max_angular_speed_*RATE + RATE*5);
+                    attempts = (int)(goal_timeout_ * RATE);
                 }
                 if(new_path_)
                 {
@@ -744,7 +748,7 @@ private:
                     std::stringstream ss;
                     ss << goal_path_.header.stamp.sec;
                     ss >> msg_goal_reached.goal_id.id;
-                    attempts = (int)(get_path_total_distance(goal_path_)/max_linear_speed_*4*RATE + 5*RATE);
+                    attempts = (int)(goal_timeout_ * RATE);
                 }
                 break;
 

@@ -52,6 +52,7 @@ ament_python_install_package(${PROJECT_NAME})
 
 install(PROGRAMS
   ${PROJECT_NAME}/publish_enable.py
+  ${PROJECT_NAME}/odom_filter.py
   DESTINATION lib/${PROJECT_NAME}
 )
 

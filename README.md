@@ -58,3 +58,13 @@ ros2 launch surge_et_ambula go2_up.launch.py
 # 5. Launch on the robot (LiDAR + cmd_vel bridge)
 ros2 launch ydlidar_ros2_driver ydlidar_launch.py
 
+# 6. Navegación con pumas_nav2 (en el PC, en otra terminal)
+#    Permite enviar goal points desde RViz para que el Go2 navegue al destino
+source install/setup.bash   # ¡Importante! Cargar el workspace
+ros2 launch navigation_start go2_navigation.launch.xml
+# Opcional: usar otro mapa (ej. lab)
+ros2 launch navigation_start go2_navigation.launch.xml map_name:=lab
+
+# Nota: El topic /scan debe tener frame_id (ej. laser_frame). Verifica que el YDLidar
+# en el robot tenga frame_id configurado en params (TG.yaml).
+

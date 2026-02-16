@@ -58,6 +58,7 @@ class DogBaseNode : public rclcpp::Node{
 		std::unique_ptr<tf2_ros::TransformBroadcaster> tbc;
 		DogStatus status;
 		float bodyHeight;
+		bool publish_tf_{true};  // false cuando se usa go2_navigation (RF2O publica odom)
 
 	public:
 		DogBaseNode();
@@ -96,6 +97,17 @@ void signal_handler(int signal){
 
 DogBaseNode::DogBaseNode():
 	Node("dog_base_node"), bodyHeight(0){
+	this->declare_parameter("publish_tf", true);
+	// Acepta bool o string "true"/"false" (desde launch)
+	rclcpp::Parameter p;
+	if (this->get_parameter("publish_tf", p)) {
+		if (p.get_type() == rclcpp::ParameterType::PARAMETER_BOOL) {
+			publish_tf_ = p.as_bool();
+		} else if (p.get_type() == rclcpp::ParameterType::PARAMETER_STRING) {
+			std::string s = p.as_string();
+			publish_tf_ = (s == "true" || s == "1");
+		}
+	}
 	tbc = std::make_unique<tf2_ros::TransformBroadcaster>(*this);
 	pub = this->create_publisher<Request>("/api/sport/request", 5);
 	// sub_response = this->create_subscription<Response>("/api/sport/response", 10,
@@ -243,8 +255,10 @@ void DogBaseNode::handleTwist(const TwistPtr msg){
 	t.transform.rotation.z = q.z();
 	t.transform.rotation.w = q.w();
 
-	// Broadcast the transform
-	tbc->sendTransform(t);
+	// Broadcast the transform (desactivar con publish_tf:=false cuando se usa go2_navigation/RF2O)
+	if (publish_tf_) {
+		tbc->sendTransform(t);
+	}
 }
 
 

@@ -9,9 +9,11 @@ Panels:
         - /RobotModel1/Description Topic1
         - /Map1
         - /Map1/Topic1
+        - /LaserScan1/Status1
+        - /LaserScan1/Topic1
         - /Path1/Topic1
       Splitter Ratio: 0.5
-    Tree Height: 865
+    Tree Height: 572
   - Class: rviz_common/Selection
     Name: Selection
   - Class: rviz_common/Tool Properties
@@ -71,227 +73,150 @@ Visualization Manager:
         Expand Joint Details: false
         Expand Link Details: false
         Expand Tree: false
+        FL_calf:
+          Alpha: 1
+          Show Axes: false
+          Show Trail: false
+          Value: true
+        FL_calflower:
+          Alpha: 1
+          Show Axes: false
+          Show Trail: false
+          Value: true
+        FL_calflower1:
+          Alpha: 1
+          Show Axes: false
+          Show Trail: false
+          Value: true
+        FL_foot:
+          Alpha: 1
+          Show Axes: false
+          Show Trail: false
+          Value: true
+        FL_hip:
+          Alpha: 1
+          Show Axes: false
+          Show Trail: false
+          Value: true
+        FL_thigh:
+          Alpha: 1
+          Show Axes: false
+          Show Trail: false
+          Value: true
+        FR_calf:
+          Alpha: 1
+          Show Axes: false
+          Show Trail: false
+          Value: true
+        FR_calflower:
+          Alpha: 1
+          Show Axes: false
+          Show Trail: false
+          Value: true
+        FR_calflower1:
+          Alpha: 1
+          Show Axes: false
+          Show Trail: false
+          Value: true
+        FR_foot:
+          Alpha: 1
+          Show Axes: false
+          Show Trail: false
+          Value: true
+        FR_hip:
+          Alpha: 1
+          Show Axes: false
+          Show Trail: false
+          Value: true
+        FR_thigh:
+          Alpha: 1
+          Show Axes: false
+          Show Trail: false
+          Value: true
+        Head_lower:
+          Alpha: 1
+          Show Axes: false
+          Show Trail: false
+          Value: true
+        Head_upper:
+          Alpha: 1
+          Show Axes: false
+          Show Trail: false
+          Value: true
         Link Tree Style: Links in Alphabetic Order
-        arm_flex_link:
+        RL_calf:
           Alpha: 1
           Show Axes: false
           Show Trail: false
           Value: true
-        arm_lift_link:
+        RL_calflower:
           Alpha: 1
           Show Axes: false
           Show Trail: false
           Value: true
-        arm_roll_link:
+        RL_calflower1:
           Alpha: 1
           Show Axes: false
           Show Trail: false
           Value: true
-        base_b_bumper_link:
+        RL_foot:
           Alpha: 1
           Show Axes: false
           Show Trail: false
           Value: true
-        base_f_bumper_link:
+        RL_hip:
           Alpha: 1
           Show Axes: false
           Show Trail: false
           Value: true
-        base_footprint:
-          Alpha: 1
-          Show Axes: false
-          Show Trail: false
-        base_imu_frame:
-          Alpha: 1
-          Show Axes: false
-          Show Trail: false
-        base_l_drive_wheel_link:
+        RL_thigh:
           Alpha: 1
           Show Axes: false
           Show Trail: false
           Value: true
-        base_l_passive_wheel_x_frame:
-          Alpha: 1
-          Show Axes: false
-          Show Trail: false
-        base_l_passive_wheel_y_frame:
-          Alpha: 1
-          Show Axes: false
-          Show Trail: false
-        base_l_passive_wheel_z_link:
+        RR_calf:
           Alpha: 1
           Show Axes: false
           Show Trail: false
           Value: true
-        base_link:
+        RR_calflower:
           Alpha: 1
           Show Axes: false
           Show Trail: false
           Value: true
-        base_r_drive_wheel_link:
+        RR_calflower1:
           Alpha: 1
           Show Axes: false
           Show Trail: false
           Value: true
-        base_r_passive_wheel_x_frame:
-          Alpha: 1
-          Show Axes: false
-          Show Trail: false
-        base_r_passive_wheel_y_frame:
-          Alpha: 1
-          Show Axes: false
-          Show Trail: false
-        base_r_passive_wheel_z_link:
+        RR_foot:
           Alpha: 1
           Show Axes: false
           Show Trail: false
           Value: true
-        base_range_sensor_link:
+        RR_hip:
           Alpha: 1
           Show Axes: false
           Show Trail: false
           Value: true
-        base_roll_link:
-          Alpha: 1
-          Show Axes: false
-          Show Trail: false
-        hand_camera_frame:
-          Alpha: 1
-          Show Axes: false
-          Show Trail: false
-        hand_camera_gazebo_frame:
-          Alpha: 1
-          Show Axes: false
-          Show Trail: false
-        hand_l_distal_link:
+        RR_thigh:
           Alpha: 1
           Show Axes: false
           Show Trail: false
           Value: true
-        hand_l_finger_tip_frame:
-          Alpha: 1
-          Show Axes: false
-          Show Trail: false
-        hand_l_finger_vacuum_frame:
+        base:
           Alpha: 1
           Show Axes: false
           Show Trail: false
           Value: true
-        hand_l_mimic_distal_link:
+        imu:
           Alpha: 1
           Show Axes: false
           Show Trail: false
-        hand_l_proximal_link:
+        radar:
           Alpha: 1
           Show Axes: false
           Show Trail: false
-        hand_l_spring_proximal_link:
-          Alpha: 1
-          Show Axes: false
-          Show Trail: false
-          Value: true
-        hand_motor_dummy_link:
-          Alpha: 1
-          Show Axes: false
-          Show Trail: false
-        hand_palm_link:
-          Alpha: 1
-          Show Axes: false
-          Show Trail: false
-          Value: true
-        hand_r_distal_link:
-          Alpha: 1
-          Show Axes: false
-          Show Trail: false
-          Value: true
-        hand_r_finger_tip_frame:
-          Alpha: 1
-          Show Axes: false
-          Show Trail: false
-        hand_r_mimic_distal_link:
-          Alpha: 1
-          Show Axes: false
-          Show Trail: false
-        hand_r_proximal_link:
-          Alpha: 1
-          Show Axes: false
-          Show Trail: false
-        hand_r_spring_proximal_link:
-          Alpha: 1
-          Show Axes: false
-          Show Trail: false
-          Value: true
-        head_center_camera_frame:
-          Alpha: 1
-          Show Axes: false
-          Show Trail: false
-        head_center_camera_gazebo_frame:
-          Alpha: 1
-          Show Axes: false
-          Show Trail: false
-        head_l_stereo_camera_gazebo_frame:
-          Alpha: 1
-          Show Axes: false
-          Show Trail: false
-        head_l_stereo_camera_link:
-          Alpha: 1
-          Show Axes: false
-          Show Trail: false
-          Value: true
-        head_pan_link:
-          Alpha: 1
-          Show Axes: false
-          Show Trail: false
-          Value: true
-        head_r_stereo_camera_gazebo_frame:
-          Alpha: 1
-          Show Axes: false
-          Show Trail: false
-        head_r_stereo_camera_link:
-          Alpha: 1
-          Show Axes: false
-          Show Trail: false
-          Value: true
-        head_rgbd_sensor_gazebo_frame:
-          Alpha: 1
-          Show Axes: false
-          Show Trail: false
-        head_rgbd_sensor_link:
-          Alpha: 1
-          Show Axes: false
-          Show Trail: false
-          Value: true
-        head_tilt_link:
-          Alpha: 1
-          Show Axes: false
-          Show Trail: false
-          Value: true
-        torso_lift_link:
-          Alpha: 1
-          Show Axes: false
-          Show Trail: false
-          Value: true
-        wrist_flex_link:
-          Alpha: 1
-          Show Axes: false
-          Show Trail: false
-          Value: true
-        wrist_ft_sensor_frame:
-          Alpha: 1
-          Show Axes: false
-          Show Trail: false
-        wrist_ft_sensor_mount_link:
-          Alpha: 1
-          Show Axes: false
-          Show Trail: false
-        wrist_roll_link:
-          Alpha: 1
-          Show Axes: false
-          Show Trail: false
-          Value: true
-      Mass Properties:
-        Inertia: false
-        Mass: false
       Name: RobotModel
       TF Prefix: ""
       Update Interval: 0
@@ -306,7 +231,6 @@ Visualization Manager:
       Topic:
         Depth: 5
         Durability Policy: Transient Local
-        Filter size: 10
         History Policy: Keep Last
         Reliability Policy: Reliable
         Value: /augmented_map
@@ -348,7 +272,6 @@ Visualization Manager:
       Topic:
         Depth: 5
         Durability Policy: Volatile
-        Filter size: 10
         History Policy: Keep Last
         Reliability Policy: Reliable
         Value: /amcl_pose
@@ -368,9 +291,9 @@ Visualization Manager:
       Enabled: true
       Invert Rainbow: false
       Max Color: 255; 255; 255
-      Max Intensity: 0
+      Max Intensity: 10
       Min Color: 0; 0; 0
-      Min Intensity: 0
+      Min Intensity: 10
       Name: LaserScan
       Position Transformer: XYZ
       Selectable: true
@@ -380,9 +303,8 @@ Visualization Manager:
       Topic:
         Depth: 5
         Durability Policy: Volatile
-        Filter size: 10
         History Policy: Keep Last
-        Reliability Policy: Reliable
+        Reliability Policy: Best Effort
         Value: /scan
       Use Fixed Frame: true
       Use rainbow: true
@@ -410,7 +332,6 @@ Visualization Manager:
       Topic:
         Depth: 5
         Durability Policy: Volatile
-        Filter size: 10
         History Policy: Keep Last
         Reliability Policy: Reliable
         Value: /simple_move/goal_path
@@ -430,9 +351,6 @@ Visualization Manager:
     - Class: rviz_default_plugins/Measure
       Line color: 128; 128; 0
     - Class: rviz_default_plugins/SetInitialPose
-      Covariance x: 0.25
-      Covariance y: 0.25
-      Covariance yaw: 0.06853891909122467
       Topic:
         Depth: 5
         Durability Policy: Volatile
@@ -461,7 +379,7 @@ Visualization Manager:
   Views:
     Current:
       Class: rviz_default_plugins/Orbit
-      Distance: 28.78860855102539
+      Distance: 12.078737258911133
       Enable Stereo Rendering:
         Stereo Eye Separation: 0.05999999865889549
         Stereo Focal Distance: 1
@@ -476,18 +394,18 @@ Visualization Manager:
       Invert Z Axis: false
       Name: Current View
       Near Clip Distance: 0.009999999776482582
-      Pitch: 0.9347963333129883
+      Pitch: 0.679796576499939
       Target Frame: <Fixed Frame>
       Value: Orbit (rviz)
-      Yaw: 6.195408344268799
+      Yaw: 4.445405960083008
     Saved: ~
 Window Geometry:
   Displays:
     collapsed: false
-  Height: 1371
+  Height: 1009
   Hide Left Dock: false
   Hide Right Dock: false
-  QMainWindow State: 000000ff00000000fd00000004000000000000021a00000459fc0200000007fb0000001200530065006c0065006300740069006f006e00000001e10000009b000000b000fffffffb000000120056006900650077007300200054006f006f02000001df000002110000018500000122fb000000200054006f006f006c002000500072006f0070006500720074006900650073003203000002880000011d000002210000017afb000000100044006900730070006c006100790073010000006e000004590000018200fffffffb0000002000730065006c0065006300740069006f006e00200062007500660066006500720200000138000000aa0000023a00000294fb00000014005700690064006500530074006500720065006f02000000e6000000d2000003ee0000030bfb0000000c004b0069006e0065006300740200000186000001060000030c00000261000000010000017b00000459fc0200000003fb0000001e0054006f006f006c002000500072006f0070006500720074006900650073000000003e0000015a000000b000fffffffc0000006e000004590000013200fffffffa000000010100000002fb0000001e0054006f006f006c002000500072006f00700065007200740069006500730100000000ffffffff0000000000000000fb0000000a0056006900650077007301000003a10000010f0000017b00fffffffb0000001200530065006c0065006300740069006f006e010000025a000000b200000000000000000000000200000490000000a9fc0100000001fb0000000a00560069006500770073030000004e00000080000002e10000019700000003000009df0000005afc0100000002fb0000000800540069006d00650100000000000009df0000051d00fffffffb0000000800540069006d00650100000000000004500000000000000000000006320000045900000004000000040000000800000008fc0000000100000002000000010000000a0054006f006f006c00730100000000ffffffff0000000000000000
+  QMainWindow State: 000000ff00000000fd00000004000000000000021a00000307fc0200000007fb0000001200530065006c0065006300740069006f006e00000001e10000009b0000006b00fffffffb000000120056006900650077007300200054006f006f02000001df000002110000018500000122fb000000200054006f006f006c002000500072006f0070006500720074006900650073003203000002880000011d000002210000017afb000000100044006900730070006c006100790073010000004400000307000000eb00fffffffb0000002000730065006c0065006300740069006f006e00200062007500660066006500720200000138000000aa0000023a00000294fb00000014005700690064006500530074006500720065006f02000000e6000000d2000003ee0000030bfb0000000c004b0069006e0065006300740200000186000001060000030c00000261000000010000017b00000307fc0200000003fb0000001e0054006f006f006c002000500072006f0070006500720074006900650073000000003e0000015a0000006b00fffffffc0000004400000307000000b900fffffffa000000010100000002fb0000001e0054006f006f006c002000500072006f00700065007200740069006500730100000000ffffffff0000000000000000fb0000000a0056006900650077007301000003a10000010f0000010200fffffffb0000001200530065006c0065006300740069006f006e010000025a000000b200000000000000000000000200000490000000a9fc0100000001fb0000000a00560069006500770073030000004e00000080000002e100000197000000030000078000000081fc0100000002fb0000000800540069006d00650100000000000007800000006b00fffffffb0000000800540069006d00650100000000000004500000000000000000000003dd0000030700000004000000040000000800000008fc0000000100000002000000010000000a0054006f006f006c00730100000000ffffffff0000000000000000
   Selection:
     collapsed: false
   Time:
@@ -496,6 +414,6 @@ Window Geometry:
     collapsed: false
   Views:
     collapsed: false
-  Width: 2527
-  X: 132
-  Y: 64
+  Width: 1920
+  X: 0
+  Y: 34

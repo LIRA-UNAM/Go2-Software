@@ -1,8 +1,9 @@
 from launch import LaunchDescription
 from launch_ros.actions import Node
-from ament_index_python.packages import get_package_share_directory
-from launch.actions import DeclareLaunchArgument
+from launch.actions import DeclareLaunchArgument, GroupAction
+from launch.conditions import UnlessCondition
 from launch.substitutions import LaunchConfiguration, PathJoinSubstitution, TextSubstitution
+from ament_index_python.packages import get_package_share_directory
 import os
 
 def generate_launch_description():
@@ -81,6 +82,15 @@ def generate_launch_description():
             arguments=['-0.15', '0', '0.05', '0', '3.14', '0', 'Head_upper', 'laser_frame']
         ),
 
+        # base_footprint a nivel de patas (map/odom en z=0). AMCL usa base_footprint para map->odom.
+        Node(
+            package='tf2_ros',
+            executable='static_transform_publisher',
+            name='base_footprint_publisher',
+            output='screen',
+            arguments=['0', '0', '-0.28', '0', '0', '0', 'base_link', 'base_footprint']
+        ),
+
         Node(
             package='rviz2',
             executable='rviz2',
@@ -137,11 +147,17 @@ def generate_launch_description():
             name='amcl',
             output='screen',
             parameters=[
-                {'base_frame_id': 'base_link'},
+                {'base_frame_id': 'base_footprint'},  # Patas en z=0, map y odom al mismo nivel
                 {'odom_frame_id': 'odom'},
                 {'global_frame_id': 'map'},
                 {'scan_topic': 'scan'},
-                {'set_initial_pose': True}
+                {'set_initial_pose': True},
+                # Mayor ruido en odom = confiar mas en el lidar (evita perderse al mover con joystick)
+                {'alpha1': 0.5},
+                {'alpha2': 0.5},
+                {'alpha3': 0.5},
+                {'alpha4': 0.5},
+                {'max_beams': 80},
             ]
         ),
 

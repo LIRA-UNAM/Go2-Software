@@ -18,13 +18,28 @@ class JointStateRelay(Node):
         self.sub = self.create_subscription(LowState, '/lowstate', self.lowstate_callback, 10)
 
     def lowstate_callback(self, msg):
+        # Usar indice fijo: motor_state[0:12] = FL, FR, RL, RR (hip, thigh, calf cada uno)
+        # Siempre publicar 12 posiciones para que robot_state_publisher muestre las 4 patas.
+        # Si un motor tiene mode==0, usar 0.0 para evitar desincronizacion nombre/posicion.
         joint_state = JointState()
         joint_state.header = Header()
         joint_state.header.stamp = self.get_clock().now().to_msg()
         joint_state.name = JOINT_NAMES
-        joint_state.position = [m.q for m in msg.motor_state if m.mode != 0]
-        joint_state.velocity = [m.dq for m in msg.motor_state if m.mode != 0]
-        joint_state.effort = [m.tau_est for m in msg.motor_state if m.mode != 0]
+        positions = []
+        velocities = []
+        efforts = []
+        for i in range(len(JOINT_NAMES)):
+            if i < len(msg.motor_state) and msg.motor_state[i].mode != 0:
+                positions.append(msg.motor_state[i].q)
+                velocities.append(msg.motor_state[i].dq)
+                efforts.append(msg.motor_state[i].tau_est)
+            else:
+                positions.append(0.0)
+                velocities.append(0.0)
+                efforts.append(0.0)
+        joint_state.position = positions
+        joint_state.velocity = velocities
+        joint_state.effort = efforts
 
         self.pub.publish(joint_state)
 

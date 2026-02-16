@@ -29,7 +29,9 @@ class OdomToTF(Node):
 
         t.transform.translation.x = msg.pose.pose.position.x
         t.transform.translation.y = msg.pose.pose.position.y
-        t.transform.translation.z = msg.pose.pose.position.z
+        # Si z=0 (2D), usar 0.28 para que base_footprint (offset -0.28) quede en el suelo
+        z = msg.pose.pose.position.z
+        t.transform.translation.z = z if abs(z) > 0.01 else 0.28
         t.transform.rotation = msg.pose.pose.orientation
 
         self.tf_broadcaster.sendTransform(t)

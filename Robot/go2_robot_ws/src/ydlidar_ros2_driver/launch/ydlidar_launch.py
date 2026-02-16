@@ -29,6 +29,12 @@ def generate_launch_description():
         description='Path to the ROS2 parameters file to use.'
     )
 
+    publish_tf_arg = DeclareLaunchArgument(
+        'publish_tf',
+        default_value='true',
+        description='Si false, dogbase no publica odom->base_link (usar con go2_navigation para evitar robot errático).'
+    )
+
     driver_node = LifecycleNode(
         package='ydlidar_ros2_driver',
         executable='ydlidar_ros2_driver_node',   # en Foxy es "executable" (no "node_executable")
@@ -52,11 +58,13 @@ def generate_launch_description():
         executable='dogbase',
         name='dog_base_node',
         output='screen',
-        emulate_tty=True
+        emulate_tty=True,
+        parameters=[{'publish_tf': LaunchConfiguration('publish_tf', default='true')}]
     )
 
     return LaunchDescription([
         params_declare,
+        publish_tf_arg,
         driver_node,
         joy_node,
         dogbase_node
