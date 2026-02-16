@@ -25,6 +25,8 @@ setup(
          glob('maps/lab/*')),
         ('share/' + package_name + '/maps/my_house',
          glob('maps/my_house/*')),
+        ('share/' + package_name + '/maps/my_room',
+         glob('maps/my_room/*')),
 
         # (OPCIONAL) otras carpetas de recursos si existen:
         # ('share/' + package_name + '/urdf',   glob('urdf/*')),

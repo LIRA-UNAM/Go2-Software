@@ -73,7 +73,7 @@ El robot usa publish_tf:=false fijo. No hay que pasar argumentos. dogbase public
 - **Sintoma:** Con RF2O el laser "gira mas" que la odometria; el robot se pierde mucho al rotar.
 - **Causas:** RF2O subestima la rotacion (comun en scan-matching 2D); desfase de timestamps TF/scan; zona muerta del odom_filter retrasa actualizaciones de rotacion.
 - **Correcciones aplicadas:**
-  1. **odom_filter:** Usa `msg.header.stamp` para el TF (sincronizado con el scan de RF2O).
+  1. **odom_filter:** Usa `get_clock().now()` para el TF (evita que el modelo no se vea si el scan tiene stamp del robot).
   2. **AMCL (go2_navigation_amcl_rf2o):** alpha1/alpha2 mas altos (0.5) para que AMCL confie mas en el laser que en la odom para rotacion; transform_tolerance 1.0 s.
   3. **odom_filter:** angular_threshold reducido a 0.01 rad (~0.6°) para rotaciones mas responsivas.
 - **Si persiste:** Verificar TF laser_frame→base_link; RF2O es sensible a la orientacion del lidar.
@@ -112,10 +112,10 @@ Ajusta segun la posicion real del robot en el mapa. Si la pose es incorrecta, us
 - **Problema:** RF2O tarda ~2 scans (~200 ms) en publicar; durante ese tiempo no existía `odom→base_link` y AMCL fallaba.
 - **Corrección:** `odom_filter` publica TF `odom→base_link` en (0,0,0) cada 100 ms hasta que llega el primer mensaje de RF2O. Así AMCL tiene el árbol TF completo desde el arranque.
 
-### 17. **"Invalid frame ID 'map' passed to canTransform - frame does not exist"** (CORREGIDO)
-- **Sintoma:** RViz, mvn_pln, potential_fields, simple_move reportan que el frame "map" no existe.
-- **Causa:** AMCL no publica `map→odom` porque no puede localizar. A su vez, AMCL necesita la cadena TF `base_link→laser_frame` para procesar /scan. Esa cadena solo la publica **go2_up** (robot_state_publisher + static_tf_pub_laser).
-- **Correccion:** `go2_navigation_amcl_rf2o.launch.xml` ahora **incluye go2_up** automaticamente. Solo hay que lanzar el robot (ydlidar) y luego `go2_navigation_amcl_rf2o` en el PC.
+### 17. **"Invalid frame ID 'map' passed to canTransform - frame does not exist"**
+- **Sintoma:** Al arrancar, mvn_pln, potential_fields, simple_move reportan que el frame "map" no existe.
+- **Causa:** AMCL publica `map→odom` solo tras activarse y localizar. Los nodos de navegación arrancan antes y buscan el transform hasta que AMCL lo publica.
+- **Comportamiento:** Son avisos **transitorios al inicio**; suelen desaparecer en ~1 s cuando AMCL publica `map→odom`. Si persisten, verifica que go2_up esté incluido y que AMCL reciba el mapa.
 
 ### 18. **No se ven los frames `odom` ni `map` en RViz**
 - **Síntoma:** El árbol TF no muestra `map` ni `odom`; Fixed Frame en RViz da error.
@@ -135,7 +135,10 @@ Ajusta segun la posicion real del robot en el mapa. Si la pose es incorrecta, us
   ```
   (Ctrl+C en `topic echo` tras ver un mensaje; Foxy no soporta `-n 1`). Si `/odom_rf2o_raw` no tiene Hz, RF2O no publica (revisa `/scan`). Si `odom_filter` no aparece en node list, el nodo no arrancó.
 
-### 19. **Pose inicial en EMCL2**
+### 19. **AMCL no usa el mapa aumentado**
+AMCL se suscribe solo a `/map` (mapa estático del static_map_server). El mapa aumentado `/augmented_map` (franja amarilla, óvalo rosa en RViz) es solo para planificación de rutas y no afecta la localización. AMCL usa exclusivamente las celdas ocupadas (negro) del mapa estático.
+
+### 20. **Pose inicial en EMCL2**
 Si el robot no localiza bien, define la pose inicial en el mapa. En `go2_navigation.launch.xml` puedes añadir parámetros al nodo emcl2:
 ```xml
 <param name="initial_pose_x" value="0.0"/>
@@ -143,3 +146,22 @@ Si el robot no localiza bien, define la pose inicial en el mapa. En `go2_navigat
 <param name="initial_pose_a" value="0.0"/>
 ```
 Ajusta los valores según la posición real del robot en el mapa.
+
+### 21. **AMCL: "Failed to transform initial pose in time (extrapolation into the future)"**
+- **Síntoma:** Al usar "2D Pose Estimate" en RViz, AMCL muestra este aviso aunque la pose se aplica.
+- **Causa:** El TF `odom→base_link` usa `get_clock().now()`; el mensaje de RViz puede tener timestamp ligeramente futuro respecto al último TF.
+- **Nota:** Usar `msg.header.stamp` del robot puede romper la visualización en RViz si el reloj del robot y del PC no están sincronizados (NTP). Se mantiene `get_clock().now()`. El odom_publisher publica TF inicial cada 100 ms hasta el primer mensaje del robot.
+
+### 22. **RF2O: modelo no visible en RViz (AMCL sí funciona)** (CORREGIDO)
+- **Síntoma:** Con `go2_navigation_amcl` se ve el robot en RViz; con `go2_navigation_amcl_rf2o` no.
+- **Causa:** `odom_filter` usaba `msg.header.stamp` para el TF. RF2O recibe `/scan` del robot; el stamp del odom puede heredar el reloj del robot. Si robot y PC no están sincronizados, el TF tiene timestamps incompatibles y RViz no puede transformar el modelo.
+- **Diferencia clave:** AMCL usa `odom_publisher` (odom del robot) → TF con `get_clock().now()`. RF2O usa `odom_filter` (odom de RF2O desde /scan) → antes usaba `msg.header.stamp`.
+- **Corrección:** `odom_filter` ahora usa `get_clock().now()` para el TF, igual que `odom_publisher`.
+
+### 23. **Localización OK con joystick, se pierde al navegar a goal**
+- **Síntoma:** Con movimientos pequeños (control manual) la localización va bien; al enviar un goal y navegar autónomamente, la bola rosa crece y la localización se vuelve inestable.
+- **Causas probables:** En navegación autónoma el robot se mueve más rápido; la odom de encoders tiene más deriva a velocidades altas (wheel slip). AMCL confía demasiado en una odom ruidosa.
+- **Soluciones:**
+  1. **Confiar más en el láser:** Subir `amcl_alpha1`–`amcl_alpha4` (ver AMCL_CALIBRATION.md, ejemplo "Navegación autónoma").
+  2. **Reducir velocidad:** Editar `go2_navigation_amcl.launch.xml` y bajar `max_linear_speed` (p. ej. de 0.8 a 0.5) en el nodo simple_move.
+  3. **Sincronización relojes:** Si robot y PC tienen relojes distintos, considerar NTP. Tanto `odom_publisher` como `odom_filter` usan `get_clock().now()` para el TF (evita que el modelo no se vea en RViz).

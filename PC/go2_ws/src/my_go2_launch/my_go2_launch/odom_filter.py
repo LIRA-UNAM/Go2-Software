@@ -125,7 +125,7 @@ class OdomFilterNode(Node):
         self.pub.publish(msg)
 
         t = TransformStamped()
-        t.header.stamp = msg.header.stamp
+        t.header.stamp = self.get_clock().now().to_msg()  # PC clock (como odom_publisher; msg.stamp puede venir del robot)
         t.header.frame_id = self.odom_frame
         t.child_frame_id = self.base_frame
         t.transform.translation.x = x
