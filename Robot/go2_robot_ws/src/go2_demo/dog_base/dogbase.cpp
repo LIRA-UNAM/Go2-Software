@@ -22,6 +22,7 @@
 #include <tf2_ros/transform_broadcaster.h>
 #include <geometry_msgs/msg/twist.hpp>
 #include <geometry_msgs/msg/transform_stamped.hpp>
+#include <nav_msgs/msg/odometry.hpp>
 
 #include "sport_client/sport_client.h"
 // #include <unitree_api/msg/response.hpp>
@@ -29,6 +30,7 @@
 using String           = std_msgs::msg::String;
 using StringPtr        = std::shared_ptr<String>;
 using Request          = unitree_api::msg::Request;
+using Odometry         = nav_msgs::msg::Odometry;
 // using Response         = unitree_api::msg::Response;
 // using ResponsePtr      = std::shared_ptr<Response>;
 using Twist            = geometry_msgs::msg::Twist;
@@ -56,9 +58,11 @@ class DogBaseNode : public rclcpp::Node{
 		rclcpp::Subscription<String>::SharedPtr sub_go2_trick;
 		// rclcpp::Subscription<Response>::SharedPtr sub_response;
 		std::unique_ptr<tf2_ros::TransformBroadcaster> tbc;
+		rclcpp::Publisher<Odometry>::SharedPtr odom_pub_{nullptr};
 		DogStatus status;
 		float bodyHeight;
-		bool publish_tf_{true};  // false cuando se usa go2_navigation (RF2O publica odom)
+		bool publish_tf_{false};  // false: PC publica TF (odom_publisher o odom_filter)
+		float odom_x_{0}, odom_y_{0}, odom_yaw_{0};  // integracion para odom topic
 
 	public:
 		DogBaseNode();
@@ -97,8 +101,7 @@ void signal_handler(int signal){
 
 DogBaseNode::DogBaseNode():
 	Node("dog_base_node"), bodyHeight(0){
-	this->declare_parameter("publish_tf", true);
-	// Acepta bool o string "true"/"false" (desde launch)
+	this->declare_parameter("publish_tf", false);
 	rclcpp::Parameter p;
 	if (this->get_parameter("publish_tf", p)) {
 		if (p.get_type() == rclcpp::ParameterType::PARAMETER_BOOL) {
@@ -109,6 +112,9 @@ DogBaseNode::DogBaseNode():
 		}
 	}
 	tbc = std::make_unique<tf2_ros::TransformBroadcaster>(*this);
+	if (!publish_tf_) {
+		odom_pub_ = this->create_publisher<Odometry>("/utlidar/robot_odom", 10);
+	}
 	pub = this->create_publisher<Request>("/api/sport/request", 5);
 	// sub_response = this->create_subscription<Response>("/api/sport/response", 10,
 	// 	std::bind(&DogBaseNode::handleResponse, this, std::placeholders::_1)
@@ -227,37 +233,46 @@ void DogBaseNode::handleTrick(const StringPtr msg){
 }
 
 void DogBaseNode::handleTwist(const TwistPtr msg){
-	// RCLCPP_INFO(this->get_logger(),
-	// 	"Handle twist: (%0.2f,%0.2f,%0.2f) (%0.2f,%0.2f,%0.2f)",
-	// 	msg->linear.x,  msg->linear.y,  msg->linear.z,
-	// 	msg->angular.x, msg->angular.y, msg->angular.z
-	// );
-	TransformStamped t;
+	auto now = this->get_clock()->now();
+	// Integracion simple (dead reckoning desde cmd_vel)
+	odom_x_   += msg->linear.x * 0.1;
+	odom_y_   += msg->linear.y * 0.1;
+	odom_yaw_ += msg->angular.z * 0.1;
 
-	// Initialize tf variables
-	t.header.stamp = this->get_clock()->now();
-	t.header.frame_id = "odom";
-	t.child_frame_id = "base_link";
-
-	// Go2 moves on ground: x is front-back, y is left-right
-	// Here we forward the Twist data to the Go2 and tranform.
 	sc->Move(msg->linear.x, msg->linear.y, msg->angular.z);
-	t.transform.translation.x+= msg->linear.x;
-	t.transform.translation.y+= msg->linear.y;
-	t.transform.translation.z = 0.0;
-	//t.transform.translation = msg->linear;
 
-	// Rotation is only on theta (vector z)
 	tf2::Quaternion q;
-	q.setRPY(0, 0, msg->angular.z);
-	t.transform.rotation.x = q.x();
-	t.transform.rotation.y = q.y();
-	t.transform.rotation.z = q.z();
-	t.transform.rotation.w = q.w();
+	q.setRPY(0, 0, odom_yaw_);
 
-	// Broadcast the transform (desactivar con publish_tf:=false cuando se usa go2_navigation/RF2O)
 	if (publish_tf_) {
+		TransformStamped t;
+		t.header.stamp = now;
+		t.header.frame_id = "odom";
+		t.child_frame_id = "base_link";
+		t.transform.translation.x = odom_x_;
+		t.transform.translation.y = odom_y_;
+		t.transform.translation.z = 0.0;
+		t.transform.rotation.x = q.x();
+		t.transform.rotation.y = q.y();
+		t.transform.rotation.z = q.z();
+		t.transform.rotation.w = q.w();
 		tbc->sendTransform(t);
+	} else if (odom_pub_) {
+		Odometry odom;
+		odom.header.stamp = now;
+		odom.header.frame_id = "odom";
+		odom.child_frame_id = "base_link";
+		odom.pose.pose.position.x = odom_x_;
+		odom.pose.pose.position.y = odom_y_;
+		odom.pose.pose.position.z = 0.0;
+		odom.pose.pose.orientation.x = q.x();
+		odom.pose.pose.orientation.y = q.y();
+		odom.pose.pose.orientation.z = q.z();
+		odom.pose.pose.orientation.w = q.w();
+		odom.twist.twist.linear.x = msg->linear.x;
+		odom.twist.twist.linear.y = msg->linear.y;
+		odom.twist.twist.angular.z = msg->angular.z;
+		odom_pub_->publish(odom);
 	}
 }
 

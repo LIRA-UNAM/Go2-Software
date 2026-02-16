@@ -2,21 +2,23 @@
 
   <!-- ============================================================ -->
   <!-- Go2 Navigation con AMCL + RF2O (odometria desde /scan YDLidar) -->
-  <!-- Requiere lanzar ANTES:                                        -->
-  <!--   Robot: ros2 launch ydlidar_ros2_driver ydlidar_launch.py    -->
-  <!--         (publish_tf:=false por defecto, no publicar odom)     -->
-  <!--   PC:    ros2 launch surge_et_ambula go2_up.launch.py         -->
-  <!--         use_rf2o_odom:=true                                   -->
-  <!--                                                               -->
-  <!-- RF2O usa /scan del YDLidar para odometria. odom_filter        -->
-  <!-- reduce drift cuando el robot esta parado. AMCL usa esa odom.  -->
+  <!-- Requiere: Robot con ydlidar_launch.py (sin argumentos)        -->
+  <!-- Incluye: go2_up, RF2O, odom_filter, map_server, AMCL          -->
   <!-- ============================================================ -->
+
+  <!-- Incluir go2_up: robot_state_publisher, base_link->laser_frame, joystick -->
+  <include file="$(find-pkg-share surge_et_ambula)/launch/go2_up.launch.py">
+    <arg name="launch_rviz2" value="false"/>
+  </include>
 
   <arg name="use_sim_time" default="false"/>
 
   <arg name="map_name" default="my_house"/>
   <arg name="static_map_file" default="$(find-pkg-share surge_et_ambula)/maps/$(var map_name)/map.yaml"/>
   <arg name="prohibition_map_file" default="$(find-pkg-share surge_et_ambula)/maps/$(var map_name)/prohibition_map.yaml"/>
+  <arg name="initial_pose_x" default="0.0"/>
+  <arg name="initial_pose_y" default="0.0"/>
+  <arg name="initial_pose_yaw" default="0.0"/>
 
   <arg name="odom_raw_topic" default="/odom_rf2o_raw"/>
   <arg name="odom_topic" default="/odom_rf2o"/>
@@ -75,7 +77,7 @@
     <param name="input_topic" value="$(var odom_raw_topic)"/>
     <param name="output_topic" value="$(var odom_topic)"/>
     <param name="linear_threshold" value="0.015"/>
-    <param name="angular_threshold" value="0.02"/>
+    <param name="angular_threshold" value="0.01"/>
   </node>
 
   <!-- TF base_link -> base_footprint (mvn_pln usa base_footprint) -->
@@ -84,14 +86,14 @@
         exec="static_transform_publisher"
         args="0 0 0 0 0 0 base_link base_footprint"/>
 
-  <!-- Map servers: static para map_augmenter, prohibition para capas -->
+  <!-- Map servers: static para AMCL y map_augmenter, prohibition para capas -->
   <node name="static_map_server"
         pkg="nav2_map_server"
         exec="map_server"
         output="screen"
         respawn="true">
     <param name="yaml_filename" value="$(var static_map_file)"/>
-    <remap from="/map" to="/nav_map"/>
+    <!-- Publica en /map para AMCL; map_augmenter usa el servicio /static_map_server/map -->
   </node>
 
   <node name="prohibition_map_server"
@@ -103,6 +105,36 @@
     <remap from="/map" to="/fixed_prohibition_layer_map"/>
   </node>
 
+  <!-- AMCL: localizacion (usa odom de odom_filter que filtra RF2O) -->
+  <!-- RF2O subestima rotacion; alpha1/alpha2 mas altos = AMCL confia mas en el laser -->
+  <!-- transform_tolerance mayor para tolerar desfase scan/odom -->
+  <node name="amcl"
+        pkg="nav2_amcl"
+        exec="amcl"
+        output="screen"
+        respawn="true">
+    <param name="base_frame_id" value="base_link"/>
+    <param name="odom_frame_id" value="odom"/>
+    <param name="global_frame_id" value="map"/>
+    <param name="scan_topic" value="scan"/>
+    <param name="set_initial_pose" value="true"/>
+    <param name="initial_pose.x" value="$(var initial_pose_x)"/>
+    <param name="initial_pose.y" value="$(var initial_pose_y)"/>
+    <param name="initial_pose.z" value="0.0"/>
+    <param name="initial_pose.yaw" value="$(var initial_pose_yaw)"/>
+    <param name="min_particles" value="1000"/>
+    <param name="max_particles" value="3000"/>
+    <param name="pf_err" value="0.1"/>
+    <param name="laser_model_type" value="likelihood_field"/>
+    <param name="max_beams" value="90"/>
+    <param name="transform_tolerance" value="1.0"/>
+    <param name="alpha1" value="0.5"/>
+    <param name="alpha2" value="0.5"/>
+    <param name="alpha3" value="0.3"/>
+    <param name="alpha4" value="0.3"/>
+    <param name="alpha5" value="0.1"/>
+  </node>
+
   <node name="lifecycle_manager_map"
         pkg="nav2_lifecycle_manager"
         exec="lifecycle_manager"
@@ -110,7 +142,7 @@
         respawn="true">
     <param name="use_sim_time" value="$(var use_sim_time)"/>
     <param name="autostart" value="true"/>
-    <param name="node_names" value="['static_map_server', 'prohibition_map_server']"/>
+    <param name="node_names" value="['static_map_server', 'prohibition_map_server', 'amcl']"/>
   </node>
 
   <!-- Map Enhancer -->
@@ -126,8 +158,6 @@
     <remap from="/grid_map/get_augmented_map" to="/prohibition_map"/>
     <remap from="/grid_map/augmented_map" to="/prohibition_layer_map"/>
   </node>
-
-  <!-- Localizacion: AMCL de go2_up usa TF odom->base_link (de odom_filter). -->
 
   <!-- Map Augmenters -->
   <node name="map_augmenter"

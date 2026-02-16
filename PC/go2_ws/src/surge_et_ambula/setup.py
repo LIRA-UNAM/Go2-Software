@@ -15,9 +15,9 @@ setup(
         # package.xml en share/<paquete>
         ('share/' + package_name, ['package.xml']),
 
-        # Launch files (dentro del paquete de código)
+        # Launch files
         ('share/' + package_name + '/launch',
-         glob('surge_et_ambula/launch/*.launch.py')),
+         glob('launch/*.launch.py')),
 
         # --- Recursos que quieres compartir/instalar ---
         # Mapas: cada subcarpeta (lab, my_house, etc.) se instala preservando la estructura

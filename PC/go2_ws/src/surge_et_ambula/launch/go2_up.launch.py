@@ -1,95 +1,88 @@
+"""
+go2_up: robot en PC (TF, joystick, camara).
+Siempre igual; no depende de RF2O vs odom robot.
+La odometria (odom_publisher o RF2O+odom_filter) la lanzan los launches de navegacion.
+"""
 from launch import LaunchDescription
-from launch.actions import DeclareLaunchArgument
-from launch.substitutions import LaunchConfiguration, PathJoinSubstitution, TextSubstitution
 from launch_ros.actions import Node
+from launch.conditions import IfCondition
 from ament_index_python.packages import get_package_share_directory
+from launch.actions import DeclareLaunchArgument
+from launch.substitutions import LaunchConfiguration
 import os
 
 def generate_launch_description():
-    pkg_share = get_package_share_directory('surge_et_ambula')
-
-    # Ruta del URDF
     urdf_file = os.path.join(
         get_package_share_directory('go2_description'),
         'urdf',
         'go2_description.urdf'
-        )
-
+    )
     with open(urdf_file, 'r') as infp:
         robot_desc = infp.read()
 
-    # --- Argumento: subcarpeta del mapa (lab, my_house, etc.) ---
-    map_name = LaunchConfiguration('map_name')
-    map_config_file = PathJoinSubstitution([
-        TextSubstitution(text=pkg_share),
-        TextSubstitution(text='maps'),
-        map_name,
-        TextSubstitution(text='map.yaml')
-    ])
-
     return LaunchDescription([
         DeclareLaunchArgument(
-            'map_name',
-            default_value='my_house',
-            description='Lugar del mapa.'
+            'launch_rviz2',
+            default_value='true',
+            description='Si false, no lanzar rviz2 (cuando se incluye desde navegacion que ya lanza RViz).'
         ),
-        # Publicador del estado del robot
+
+        Node(
+            package='go2_description',
+            executable='joint_state_relay',
+            name='joint_state_relay',
+            output='screen'
+        ),
+
         Node(
             package='robot_state_publisher',
             executable='robot_state_publisher',
+            name='robot_state_publisher',
             output='screen',
             parameters=[{'robot_description': robot_desc}]
         ),
 
-        # GUI para mover articulaciones
         Node(
-            package='go2_description',
-            executable='joint_state_publisher_gui',
-            name='joint_state_publisher_gui',
-            output='screen'
+            package='joystick_teleop',
+            executable='joystick_teleop',
+            name='joystick_teleop',
         ),
 
-        # RViz2
+        Node(
+            package='tf2_ros',
+            executable='static_transform_publisher',
+            name='baselink_to_base_broadcaster',
+            output='screen',
+            arguments=['0', '0', '0', '0', '0', '0', 'base_link', 'base']
+        ),
+
+        Node(
+            package='tf2_ros',
+            executable='static_transform_publisher',
+            name='static_tf_pub_laser',
+            output='screen',
+            arguments=['-0.15', '0', '0.05', '0', '3.14', '0', 'Head_upper', 'laser_frame']
+        ),
+
         Node(
             package='rviz2',
             executable='rviz2',
             name='rviz2',
-            output='screen'
+            output='screen',
+            condition=IfCondition(LaunchConfiguration('launch_rviz2')),
         ),
 
-        # Nodo para recibir video por GStreamer y publicarlo como imagen
         Node(
             package='my_go2_launch',
-            executable='gstreamer_image_publisher',  # nombre del ejecutable que pusiste en setup.py
-            name='gstreamer_image_publisher',
+            executable='img_publisher',
+            name='img_publisher',
             output='screen',
             parameters=[{
-                'gstreamer_pipeline': "udpsrc address=230.1.1.1 port=1720 multicast-iface=enx6c1ff767936e ! "
+                'gstreamer_pipeline': "udpsrc address=230.1.1.1 port=1720 multicast-iface=enx207bd2565bdb ! "
                                        "application/x-rtp, media=video, encoding-name=H264 ! "
                                        "rtph264depay ! h264parse ! avdec_h264 ! videoconvert ! "
                                        "video/x-raw,width=1280,height=720,format=BGR ! appsink drop=1",
                 'frame_id': 'camera_link'
             }]
         ),
-
-        # Nodo para convertir PointCloud2 a LaserScan con QoS ajustable
-        Node(
-            package='my_go2_launch',
-            executable='pointcloud_to_laserscan_qos',
-            name='pointcloud_to_laserscan_qos',
-            output='screen',
-            parameters=[{
-                'target_frame': 'odom',
-                'transform_tolerance': 1.0,
-                'min_height': 0.2,
-                'max_height': 0.5,
-                'angle_min': -3.14,
-                'angle_max': 3.14,
-                'angle_increment': 0.0087,
-                'scan_time': 0.033,
-                'range_min': 0.45,
-                'range_max': 10.0,
-                'use_inf': True
-            }]
-        )
     ])

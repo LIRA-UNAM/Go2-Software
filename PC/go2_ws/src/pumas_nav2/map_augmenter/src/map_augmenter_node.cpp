@@ -883,6 +883,8 @@ private:
 
         obstacles_inflated_map_ = inflate_map(obstacles_map_, inflation_radius_);
         augmented_map_ = merge_maps(static_map_, obstacles_inflated_map_);
+        augmented_map_.header.frame_id = "map";
+        augmented_map_.header.stamp = this->now();
         response->map = augmented_map_;
 
         //RCLCPP_INFO(this->get_logger(), "MapAugmenter.-> Augmented map response has been sent with size %d x %d", 
@@ -943,6 +945,8 @@ private:
             are_there_obstacles_ = decay_map_and_check_if_obstacles(obstacles_map_, decay_factor_);
             obstacles_inflated_map_ = inflate_map(obstacles_map_, inflation_radius_);
             augmented_map_ = merge_maps(static_map_, obstacles_inflated_map_);
+            augmented_map_.header.frame_id = "map";
+            augmented_map_.header.stamp = this->now();
             pub_augmented_map_->publish(augmented_map_);
         }
 

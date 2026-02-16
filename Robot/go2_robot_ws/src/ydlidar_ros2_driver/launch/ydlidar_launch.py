@@ -29,12 +29,8 @@ def generate_launch_description():
         description='Path to the ROS2 parameters file to use.'
     )
 
-    publish_tf_arg = DeclareLaunchArgument(
-        'publish_tf',
-        default_value='false',
-        description='Si true, dogbase publica odom->base_link (solo para go2_navigation_amcl con odom robot). Si false, usar RF2O (go2_navigation_amcl_rf2o).'
-    )
-
+    # publish_tf:=false fijo: el PC publica odom->base_link (odom_publisher o odom_filter).
+    # Asi el robot no cambia; el launch de navegacion en PC elige RF2O o odom robot.
     driver_node = LifecycleNode(
         package='ydlidar_ros2_driver',
         executable='ydlidar_ros2_driver_node',   # en Foxy es "executable" (no "node_executable")
@@ -59,12 +55,11 @@ def generate_launch_description():
         name='dog_base_node',
         output='screen',
         emulate_tty=True,
-        parameters=[{'publish_tf': LaunchConfiguration('publish_tf', default='true')}]
+        parameters=[{'publish_tf': False}]
     )
 
     return LaunchDescription([
         params_declare,
-        publish_tf_arg,
         driver_node,
         joy_node,
         dogbase_node

@@ -42,6 +42,27 @@ class OdomFilterNode(Node):
         self.pub = self.create_publisher(Odometry, self.output_topic, 10)
         self.tf_broadcaster = TransformBroadcaster(self)
 
+        # Publicar TF inicial periodicamente hasta que RF2O publique (tarda ~2 scans)
+        self._initial_tf_timer = self.create_timer(0.1, self._publish_initial_tf)
+
+    def _publish_initial_tf(self):
+        """Publica odom->base_link en (0,0,0) hasta que llegue el primer mensaje de RF2O."""
+        if self.initialized:
+            self._initial_tf_timer.cancel()
+            return
+        t = TransformStamped()
+        t.header.stamp = self.get_clock().now().to_msg()
+        t.header.frame_id = self.odom_frame
+        t.child_frame_id = self.base_frame
+        t.transform.translation.x = 0.0
+        t.transform.translation.y = 0.0
+        t.transform.translation.z = self.base_link_height
+        t.transform.rotation.x = 0.0
+        t.transform.rotation.y = 0.0
+        t.transform.rotation.z = 0.0
+        t.transform.rotation.w = 1.0
+        self.tf_broadcaster.sendTransform(t)
+
     def odom_callback(self, msg):
         x = msg.pose.pose.position.x
         y = msg.pose.pose.position.y
@@ -104,7 +125,7 @@ class OdomFilterNode(Node):
         self.pub.publish(msg)
 
         t = TransformStamped()
-        t.header.stamp = self.get_clock().now().to_msg()
+        t.header.stamp = msg.header.stamp
         t.header.frame_id = self.odom_frame
         t.child_frame_id = self.base_frame
         t.transform.translation.x = x
