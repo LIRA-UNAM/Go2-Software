@@ -20,35 +20,36 @@
 ### 4. **TF base_link ↔ laser_frame**
 - **Síntoma:** `Could not find a connection between 'base_link' and 'laser_frame' because they are not part of the same tree`
 - **Causa:** El YDLidar publica `/scan` con `frame_id: laser_frame`, pero ese frame debe estar conectado a `base_link` en el árbol TF.
-- **Solución:** Los launches `go2_navigation_amcl` y `go2_navigation_amcl_rf2o` incluyen go2_up (robot_state_publisher + static_tf_pub_laser). No hay que lanzar go2_up por separado.
+- **Solución:** El launch `go2_up` en el robot incluye ydlidar + robot_state_publisher + static_tf_pub_laser + map_server. El robot publica toda la cadena TF y los mapas (/map, /fixed_prohibition_layer_map).
 
-### 5. **Arquitectura de launches** (unificada)
-- **go2_up:** Siempre igual: robot (TF, joystick, cámara). Sin odom ni mapas. Incluido por los launches de navegación.
-- **Robot (ydlidar_launch):** Siempre igual, sin argumentos. dogbase publica /utlidar/robot_odom (no TF).
-- **go2_navigation_amcl:** Incluye go2_up + odom_publisher + map_server + AMCL (odom del robot).
-- **go2_navigation_amcl_rf2o:** Incluye go2_up + RF2O + odom_filter + map_server + AMCL (odom desde /scan).
+### 5. **Arquitectura de launches** (reorganizada)
+- **Robot (go2_up):** ydlidar + dogbase + TF + joint_state + joystick + cámara + map_server. Todo en el robot. Publica /map y /fixed_prohibition_layer_map.
+- **PC (navegación):** Solo RF2O/odom_publisher, map_server, AMCL, planificación. Sin go2_up.
+- **go2_navigation_amcl:** odom_publisher + map_server + AMCL (odom del robot).
+- **go2_navigation_amcl_rf2o:** RF2O + odom_filter + map_server + AMCL (odom desde /scan).
+- **go2_navigation:** RF2O + odom_filter + EMCL2.
 
-### 6. **Orden de arranque** (unificado: robot sin argumentos)
+### 6. **Orden de arranque**
 
-**Robot:** Siempre igual, sin argumentos:
+**Robot:** Un solo launch:
 ```bash
-ros2 launch ydlidar_ros2_driver ydlidar_launch.py
+ros2 launch surge_et_ambula go2_up.launch.py
 ```
 
 **Opcion A: AMCL con odom del robot**
 ```bash
 ros2 launch navigation_start go2_navigation_amcl.launch.xml map_name:=my_house
 ```
-Incluye go2_up + odom_publisher (dogbase publica /utlidar/robot_odom, odom_publisher hace TF).
+odom_publisher convierte /utlidar/robot_odom en TF.
 
 **Opcion B: AMCL + RF2O** (odom desde /scan YDLidar)
 ```bash
 ros2 launch navigation_start go2_navigation_amcl_rf2o.launch.xml map_name:=my_house
 ```
-Incluye go2_up + RF2O + odom_filter.
+RF2O + odom_filter.
 
-**Opcion C: RF2O + EMCL2** (requiere odom_filter compilado)
-1. **Robot:** `ros2 launch ydlidar_ros2_driver ydlidar_launch.py`
+**Opcion C: RF2O + EMCL2**
+1. **Robot:** `ros2 launch surge_et_ambula go2_up.launch.py`
 2. **PC:** `ros2 launch navigation_start go2_navigation.launch.xml map_name:=my_house`
 
 ### 7. **RF2O: frame_id vacio o QoS incompatible con /scan**
@@ -114,15 +115,15 @@ Ajusta segun la posicion real del robot en el mapa. Si la pose es incorrecta, us
 
 ### 17. **"Invalid frame ID 'map' passed to canTransform - frame does not exist"** (CORREGIDO)
 - **Sintoma:** RViz, mvn_pln, potential_fields, simple_move reportan que el frame "map" no existe.
-- **Causa:** AMCL no publica `map→odom` porque no puede localizar. A su vez, AMCL necesita la cadena TF `base_link→laser_frame` para procesar /scan. Esa cadena solo la publica **go2_up** (robot_state_publisher + static_tf_pub_laser).
-- **Correccion:** `go2_navigation_amcl_rf2o.launch.xml` ahora **incluye go2_up** automaticamente. Solo hay que lanzar el robot (ydlidar) y luego `go2_navigation_amcl_rf2o` en el PC.
+- **Causa:** AMCL no publica `map→odom` porque no puede localizar. A su vez, AMCL necesita la cadena TF `base_link→laser_frame` para procesar /scan. Esa cadena la publica **robot_bringup** en el robot.
+- **Correccion:** Lanzar primero `go2_up` en el robot, luego `go2_navigation_amcl_rf2o` en el PC.
 
 ### 18. **No se ven los frames `odom` ni `map` en RViz**
 - **Síntoma:** El árbol TF no muestra `map` ni `odom`; Fixed Frame en RViz da error.
 - **Causas posibles:**
   1. **AMCL sin pose inicial:** AMCL no publica `map→odom` hasta que se establezca la pose inicial. En RViz, usa el botón **"2D Pose Estimate"** y haz clic en el mapa donde está el robot.
   2. **odom_filter no corre:** Si usas RF2O, el `odom_filter` debe publicar `odom→base_link`. Verifica que `go2_navigation_amcl_rf2o.launch.xml` lance correctamente el nodo (usa `my_go2_launch` con `exec="odom_filter"`).
-  3. **Orden de arranque:** Robot (ydlidar_launch) y luego `go2_navigation_amcl_rf2o` (incluye go2_up).
+  3. **Orden de arranque:** Robot (go2_up) y luego `go2_navigation_amcl_rf2o` en PC.
 - **Verificación (Foxy):** Ejecuta en el **PC** donde corre `go2_navigation_amcl_rf2o`. Foxy no soporta `-n 1` en `topic echo`; usa `ros2 topic echo /odom_rf2o` (Ctrl+C tras ver un mensaje) o `ros2 topic hz /odom_rf2o_raw`. Para TF: `ros2 run tf2_ros tf2_echo odom base_link`.
 - **RViz sin map/odom:** Si Fixed Frame da error, cambia temporalmente a `base_link` en Global Options para ver el robot mientras depuras.
 - **Diagnóstico paso a paso (Foxy):** Ejecuta en el PC donde corre la navegación:

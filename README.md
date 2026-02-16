@@ -34,7 +34,7 @@ source install/setup.bash
 ssh unitree@192.168.123.18 #Only if you are disconnected 
 source /opt/ros/foxy/setup.bash
 cd ~/go2_robot_ws   # o cd ~/Robot/go2_robot_ws si copiaste la carpeta Robot
-colcon list         # verifica que aparezca go2_demo (debe haber 5 paquetes)
+colcon list         # verifica surge_et_ambula, go2_description, my_go2_launch, joystick_teleop, ydlidar, go2_demo, unitree_*
 colcon build --symlink-install
 source install/setup.bash
 
@@ -52,18 +52,17 @@ sudo make install
 Note: It's necessary change the network interface inside gstreamer_image_publisher.py node.
 
 
-# 4. Launch on the PC (main stack with RViz)
+# 4. Launch on the robot (ydlidar + dogbase + TF + joystick + cámara + mapas)
 ros2 launch surge_et_ambula go2_up.launch.py
+# Con otro mapa: ros2 launch surge_et_ambula go2_up.launch.py map_name:=lab
 
-# 5. Launch on the robot (LiDAR + cmd_vel bridge)
-ros2 launch ydlidar_ros2_driver ydlidar_launch.py
-
-# 6. Navegación con pumas_nav2 (en el PC, en otra terminal)
-#    Permite enviar goal points desde RViz para que el Go2 navegue al destino
-source install/setup.bash   # ¡Importante! Cargar el workspace
-ros2 launch navigation_start go2_navigation.launch.xml
+# 5. Navegación en el PC (RF2O + AMCL + planificación)
+source install/setup.bash   # ¡Importante! Cargar el workspace del PC
+ros2 launch navigation_start go2_navigation_amcl_rf2o.launch.xml
+# Alternativa con odom del robot: go2_navigation_amcl.launch.xml
+# Alternativa con EMCL2: go2_navigation.launch.xml
 # Opcional: usar otro mapa (ej. lab)
-ros2 launch navigation_start go2_navigation.launch.xml map_name:=lab
+ros2 launch navigation_start go2_navigation_amcl_rf2o.launch.xml map_name:=lab
 
 # Nota: El topic /scan debe tener frame_id (ej. laser_frame). Verifica que el YDLidar
 # en el robot tenga frame_id configurado en params (TG.yaml).

@@ -2,20 +2,11 @@
 
   <!-- ============================================================ -->
   <!-- Go2 Navigation con AMCL + RF2O (odometria desde /scan YDLidar) -->
-  <!-- Requiere: Robot con ydlidar_launch.py (sin argumentos)        -->
-  <!-- Incluye: go2_up, RF2O, odom_filter, map_server, AMCL          -->
+  <!-- Requiere: Robot con go2_up (surge_et_ambula) - publica /map y /fixed_prohibition_layer_map -->
+  <!-- PC: navegación (RF2O, odom_filter, AMCL) - se suscribe a los mapas del robot -->
   <!-- ============================================================ -->
 
-  <!-- Incluir go2_up: robot_state_publisher, base_link->laser_frame, joystick -->
-  <include file="$(find-pkg-share surge_et_ambula)/launch/go2_up.launch.py">
-    <arg name="launch_rviz2" value="false"/>
-  </include>
-
   <arg name="use_sim_time" default="false"/>
-
-  <arg name="map_name" default="my_house"/>
-  <arg name="static_map_file" default="$(find-pkg-share surge_et_ambula)/maps/$(var map_name)/map.yaml"/>
-  <arg name="prohibition_map_file" default="$(find-pkg-share surge_et_ambula)/maps/$(var map_name)/prohibition_map.yaml"/>
   <arg name="initial_pose_x" default="0.0"/>
   <arg name="initial_pose_y" default="0.0"/>
   <arg name="initial_pose_yaw" default="0.0"/>
@@ -86,24 +77,7 @@
         exec="static_transform_publisher"
         args="0 0 0 0 0 0 base_link base_footprint"/>
 
-  <!-- Map servers: static para AMCL y map_augmenter, prohibition para capas -->
-  <node name="static_map_server"
-        pkg="nav2_map_server"
-        exec="map_server"
-        output="screen"
-        respawn="true">
-    <param name="yaml_filename" value="$(var static_map_file)"/>
-    <!-- Publica en /map para AMCL; map_augmenter usa el servicio /static_map_server/map -->
-  </node>
-
-  <node name="prohibition_map_server"
-        pkg="nav2_map_server"
-        exec="map_server"
-        output="screen"
-        respawn="true">
-    <param name="yaml_filename" value="$(var prohibition_map_file)"/>
-    <remap from="/map" to="/fixed_prohibition_layer_map"/>
-  </node>
+  <!-- Mapas: publicados por go2_up en el robot (/map, /fixed_prohibition_layer_map) -->
 
   <!-- AMCL: localizacion (usa odom de odom_filter que filtra RF2O) -->
   <!-- RF2O subestima rotacion; alpha1/alpha2 mas altos = AMCL confia mas en el laser -->
@@ -142,7 +116,7 @@
         respawn="true">
     <param name="use_sim_time" value="$(var use_sim_time)"/>
     <param name="autostart" value="true"/>
-    <param name="node_names" value="['static_map_server', 'prohibition_map_server', 'amcl']"/>
+    <param name="node_names" value="['amcl']"/>
   </node>
 
   <!-- Map Enhancer -->
@@ -168,7 +142,7 @@
     <param name="laser_scan_topic" value="$(var laser_scan_topic)"/>
     <param name="point_cloud_topic" value="$(var point_cloud_topic)"/>
     <param name="static_map_server" value="/static_map_server/map"/>
-    <param name="prohibition_map_server" value="/prohibition_map"/>
+    <param name="prohibition_map_server" value="/prohibition_map_server/map"/>
     <remap from="point_obstacle" to="/clicked_point"/>
 
     <param name="use_lidar" value="$(var use_lidar)"/>

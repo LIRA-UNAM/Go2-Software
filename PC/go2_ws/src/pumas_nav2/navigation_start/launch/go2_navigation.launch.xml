@@ -3,16 +3,11 @@
   <!-- ============================================================ -->
   <!-- Go2 Navigation - Compatible con Unitree Go2 + YDLidar        -->
   <!-- Lanzar después de:                                           -->
-  <!--   Robot: ros2 launch ydlidar_ros2_driver ydlidar_launch.py   -->
-  <!--   PC:    ros2 launch surge_et_ambula go2_up.launch.py         -->
+  <!--   Robot: ros2 launch surge_et_ambula go2_up.launch.py         -->
+  <!--   PC:    este launch (navegación, visión, etc.)               -->
   <!-- ============================================================ -->
 
   <arg name="use_sim_time" default="false"/>
-
-  <!-- Mapas: mismos que surge_et_ambula go2_up (map_name=my_house) -->
-  <arg name="map_name" default="my_house"/>
-  <arg name="static_map_file" default="$(find-pkg-share surge_et_ambula)/maps/$(var map_name)/map.yaml"/>
-  <arg name="prohibition_map_file" default="$(find-pkg-share surge_et_ambula)/maps/$(var map_name)/prohibition_map.yaml"/>
 
   <!-- Topics adaptados al Go2 (odom_filtered = salida del filtro con zona muerta) -->
   <arg name="odom_topic" default="/odom_rf2o"/>
@@ -82,34 +77,7 @@
         exec="static_transform_publisher"
         args="0 0 0 0 0 0 base_link base_footprint"/>
 
-  <!-- Map servers -->
-  <node name="static_map_server"
-        pkg="nav2_map_server"
-        exec="map_server"
-        output="screen"
-        respawn="true">
-    <param name="yaml_filename" value="$(var static_map_file)"/>
-    <remap from="/map" to="/nav_map"/>
-  </node>
-
-  <node name="prohibition_map_server"
-        pkg="nav2_map_server"
-        exec="map_server"
-        output="screen"
-        respawn="true">
-    <param name="yaml_filename" value="$(var prohibition_map_file)"/>
-    <remap from="/map" to="/fixed_prohibition_layer_map"/>
-  </node>
-
-  <node name="lifecycle_manager_map"
-        pkg="nav2_lifecycle_manager"
-        exec="lifecycle_manager"
-        output="screen"
-        respawn="true">
-    <param name="use_sim_time" value="$(var use_sim_time)"/>
-    <param name="autostart" value="true"/>
-    <param name="node_names" value="['static_map_server', 'prohibition_map_server']"/>
-  </node>
+  <!-- Mapas: publicados por go2_up en el robot (/map, /fixed_prohibition_layer_map) -->
 
   <!-- Map Enhancer -->
   <node name="map_enhancer"
@@ -148,7 +116,7 @@
     <remap from="odom" to="$(var odom_topic)"/>
     <remap from="cmd_vel" to="$(var cmd_vel_topic)"/>
     <remap from="mcl_pose" to="$(var pose_topic)"/>
-    <remap from="map" to="/nav_map"/>
+    <remap from="map" to="/map"/>
   </node>
 
   <!-- Map Augmenters -->
@@ -160,7 +128,7 @@
     <param name="laser_scan_topic" value="$(var laser_scan_topic)"/>
     <param name="point_cloud_topic" value="$(var point_cloud_topic)"/>
     <param name="static_map_server" value="/static_map_server/map"/>
-    <param name="prohibition_map_server" value="/prohibition_map"/>
+    <param name="prohibition_map_server" value="/prohibition_map_server/map"/>
     <remap from="point_obstacle" to="/clicked_point"/>
 
     <param name="use_lidar" value="$(var use_lidar)"/>
