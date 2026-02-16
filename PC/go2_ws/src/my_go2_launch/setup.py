@@ -27,7 +27,8 @@ setup(
 	    'img_publisher = my_go2_launch.gstreamer_image_publisher:main',
         'speak = my_go2_launch.speak:main',
         'odom_publisher = my_go2_launch.odom_publisher:main',
-	'laser_scan = my_go2_launch.laserscan_pass_through:main', 
+        'odom_filter = my_go2_launch.odom_filter:main',
+	'laser_scan = my_go2_launch.laserscan_pass_through:main',
         ],
     },
 )

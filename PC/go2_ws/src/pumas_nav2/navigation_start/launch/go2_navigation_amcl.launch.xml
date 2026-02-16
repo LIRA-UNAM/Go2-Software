@@ -3,11 +3,11 @@
   <!-- ============================================================ -->
   <!-- Go2 Navigation con AMCL de go2_up (sin RF2O/odom_filter)     -->
   <!-- Requiere lanzar ANTES:                                        -->
-  <!--   Robot: ros2 launch ydlidar_ros2_driver ydlidar_launch.py publish_tf:=false -->
+  <!--   Robot: ros2 launch ydlidar_ros2_driver ydlidar_launch.py  -->
   <!--   PC:    ros2 launch surge_et_ambula go2_up.launch.py        -->
   <!--                                                              -->
-  <!-- IMPORTANTE: publish_tf:=false evita TF_OLD_DATA (dogbase y odom_publisher -->
-  <!-- no deben publicar odom->base_link a la vez). Patas en mapa via base_footprint. -->
+  <!-- Usa odometria del robot (odom_publisher) y AMCL de go2_up.   -->
+  <!-- Evita el error de odom_filter.py y el drift de RF2O.         -->
   <!-- ============================================================ -->
 
   <arg name="use_sim_time" default="false"/>
@@ -46,7 +46,11 @@
   <arg name="cloud_min_z" default="0.01"/>
   <arg name="cloud_max_z" default="1.20"/>
 
-  <!-- base_footprint ya lo publica go2_up (map/odom a nivel de patas) -->
+  <!-- TF base_link -> base_footprint (mvn_pln usa base_footprint) -->
+  <node name="base_footprint_publisher"
+        pkg="tf2_ros"
+        exec="static_transform_publisher"
+        args="0 0 0 0 0 0 base_link base_footprint"/>
 
   <!-- Map servers: static para map_augmenter, prohibition para capas -->
   <node name="static_map_server"
@@ -137,21 +141,16 @@
     <param name="diagonal_paths" value="true"/>
   </node>
 
-  <!-- Simple Move: min_linear_speed y tolerancias mayores para Go2 (poca precision en movimientos muy pequenos) -->
+  <!-- Simple Move -->
   <node name="simple_move"
         pkg="simple_move"
         exec="simple_move_node"
         output="screen"
         respawn="true">
     <param name="max_linear_speed" value="0.8"/>
-    <param name="min_linear_speed" value="0.12"/>
     <param name="max_angular_speed" value="1.25"/>
     <param name="control_alpha" value="0.2"/>
     <param name="control_beta" value="0.8"/>
-    <param name="fine_dist_tolerance" value="0.07"/>
-    <param name="coarse_dist_tolerance" value="0.25"/>
-    <param name="angle_tolerance" value="0.08"/>
-    <param name="goal_timeout" value="120.0"/>
     <param name="move_head" value="false"/>
     <param name="use_pot_fields" value="$(var use_pot_fields)"/>
     <remap from="/cmd_vel" to="$(var cmd_vel_topic)"/>

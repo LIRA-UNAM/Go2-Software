@@ -12,14 +12,14 @@
 - **Causa:** ROS2 Foxy no soporta esa sintaxis de `--log-level` para rviz2.
 - **Corrección:** Eliminado el argumento `--log-level rviz2:=WARN` del nodo rviz2.
 
-### 3. **Conflicto TF: dogbase vs odom_publisher/RF2O** (CORREGIDO)
-- **Síntoma:** El robot "salta" de posición, TF_OLD_DATA "ignoring data from the past for frame base_link", o robot errático.
-- **Causa:** Tanto `dogbase` (en el robot) como `odom_publisher` o `rf2o_laser_odometry` (en el PC) publican `odom` → `base_link`. Dos fuentes con relojes distintos causan TF_OLD_DATA.
-- **Solución:** Al lanzar el robot **para navegación (AMCL o RF2O)**, usa:
+### 3. **Conflicto TF: dogbase vs RF2O** (CORREGIDO)
+- **Síntoma:** El robot "salta" de posición o se mueve errático.
+- **Causa:** Tanto `dogbase` (en el robot) como `rf2o_laser_odometry` (en el PC) publican `odom` → `base_link`. Las dos fuentes compiten y el TF "parpadea".
+- **Solución:** Al lanzar el robot **para navegación**, usa:
   ```bash
   ros2 launch ydlidar_ros2_driver ydlidar_launch.py publish_tf:=false
   ```
-  Asi dogbase no publica TF; solo odom_publisher (AMCL) o RF2O (EMCL2) lo hacen.
+  Así dogbase no publica TF y solo RF2O lo hace.
 
 ### 4. **TF base_link ↔ laser_frame**
 - **Síntoma:** `Could not find a connection between 'base_link' and 'laser_frame' because they are not part of the same tree`
@@ -29,7 +29,7 @@
 ### 5. **Orden de arranque**
 
 **Opcion A: AMCL (recomendado, evita odom_filter y drift de RF2O)**
-1. **Robot:** `ros2 launch ydlidar_ros2_driver ydlidar_launch.py publish_tf:=false`
+1. **Robot:** `ros2 launch ydlidar_ros2_driver ydlidar_launch.py`
 2. **PC:** `ros2 launch surge_et_ambula go2_up.launch.py map_name:=my_house`
 3. **PC:** `ros2 launch navigation_start go2_navigation_amcl.launch.xml`
 
@@ -48,16 +48,14 @@
   ```
   O verificar que el YDLidar tenga `frame_id: laser_frame` en su params (TG.yaml).
 
-### 7. **TF_OLD_DATA "ignoring data from the past for frame base_link"**
-- **Sintoma:** Warnings de TF_OLD_DATA, "Authority undetectable", o crash de path_planner/mvn_pln.
-- **Causa:** Dogbase (robot) y odom_publisher (PC) publican odom->base_link con relojes distintos.
-- **Solucion:** Lanzar el robot con `publish_tf:=false` en AMCL y RF2O. Solo el PC debe publicar odom->base_link.
+### 7. **¿Usas publish_tf:=false en el robot?**
+Si el robot sigue "loco", confirma que lanzas:
+```bash
+ros2 launch ydlidar_ros2_driver ydlidar_launch.py publish_tf:=false
+```
+Sin esto, dogbase y RF2O compiten publicando odom→base_link.
 
-### 8. **Mapa y patas: map/odom a nivel del suelo**
-- **Estructura:** map y odom en z=0. base_link a 0.28m (cuerpo). base_footprint a -0.28m de base_link (patas).
-- **Config:** base_footprint_publisher (0 0 -0.28), odom_publisher usa z=0.28 cuando odom tiene z=0.
-
-### 9. **Deriva de RF2O cuando el robot esta parado** (MITIGADO)
+### 8. **Deriva de RF2O cuando el robot esta parado** (MITIGADO)
 - **Sintoma:** El robot "salta" en RViz aunque este quieto.
 - **Causa:** RF2O integra ruido de scan-matching como movimiento real.
 - **Mitigacion aplicada:**
@@ -79,13 +77,7 @@
 - **Causa:** `joint_state_relay` filtraba motores con `mode==0`, generando menos posiciones que nombres de joints. Las patas traseras quedaban sin datos validos.
 - **Correccion:** El relay ahora usa indice fijo y asigna 0.0 a motores deshabilitados, publicando siempre 12 posiciones para las 4 patas.
 
-### 11. **Parametros Go2 (simple_move, AMCL, TF)**
-- **AMCL (go2_up):** alpha1-4=0.5 para confiar mas en el lidar que en la odometria al mover con joystick.
-- **TF base_footprint:** offset -0.28m en Z (go2_navigation_amcl) para que las patas queden sobre el mapa.
-- **simple_move:** min_linear_speed=0.12, fine_dist_tolerance=0.07, angle_tolerance=0.08, goal_timeout=120s.
-- **Timeout:** parametro `goal_timeout` en simple_move (segundos). Tambien en mvn_pln, potential_fields (10s para TF).
-
-### 12. **Pose inicial en EMCL2**
+### 11. **Pose inicial en EMCL2**
 Si el robot no localiza bien, define la pose inicial en el mapa. En `go2_navigation.launch.xml` puedes añadir parámetros al nodo emcl2:
 ```xml
 <param name="initial_pose_x" value="0.0"/>
