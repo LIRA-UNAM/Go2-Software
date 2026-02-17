@@ -33,7 +33,8 @@ setup(
             'image_sub = vision_pkg.image_subscriber:main',
             'dino_server = vision_pkg.grounding_dino_server:main',
 	    'yolo_node = vision_pkg.yolo_node:main',
-	    'dino_client = vision_pkg.dino_client:main'
+	    'dino_client = vision_pkg.dino_client:main',
+            'video_recorder = vision_pkg.video_recorder:main'
         ],
     },
 )
