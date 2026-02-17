@@ -99,7 +99,7 @@
     <param name="freq" value="$(var rf2o_freq)"/>
   </node>
 
-  <!-- Filtro zona muerta: ignora drift pequeno de RF2O cuando el robot esta parado -->
+  <!-- Filtro zona muerta: publica /odom_rf2o y TF odom->base_link (sin EKF, odom_filter es el publicador) -->
   <node name="odom_filter"
         pkg="my_go2_launch"
         exec="odom_filter"
@@ -109,6 +109,7 @@
     <param name="output_topic" value="$(var odom_topic)"/>
     <param name="linear_threshold" value="$(var odom_filter_linear_threshold)"/>
     <param name="angular_threshold" value="$(var odom_filter_angular_threshold)"/>
+    <param name="publish_tf" value="true"/>
   </node>
 
   <!-- TF base_link -> base_footprint (mvn_pln usa base_footprint) -->
@@ -137,13 +138,13 @@
   </node>
 
   <!-- AMCL: localizacion (usa odom de odom_filter que filtra RF2O) -->
-  <!-- RF2O subestima rotacion; alpha1/alpha2 mas altos = AMCL confia mas en el laser -->
+  <!-- base_footprint para que map y odom queden al mismo nivel (suelo) -->
   <node name="amcl"
         pkg="nav2_amcl"
         exec="amcl"
         output="screen"
         respawn="true">
-    <param name="base_frame_id" value="base_link"/>
+    <param name="base_frame_id" value="base_footprint"/>
     <param name="odom_frame_id" value="odom"/>
     <param name="global_frame_id" value="map"/>
     <param name="scan_topic" value="scan"/>

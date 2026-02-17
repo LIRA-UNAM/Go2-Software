@@ -1,40 +1,28 @@
 <launch>
 
   <!-- ============================================================ -->
-  <!-- Go2 Navigation con AMCL (odom del robot via /utlidar/robot_odom) -->
-  <!-- Requiere: Robot con ydlidar_launch.py (sin argumentos)        -->
-  <!-- Incluye: go2_up, odom_publisher, map_server, AMCL, planificacion -->
-  <!-- Para RF2O: go2_navigation_amcl_rf2o.launch.xml                -->
+  <!-- Go2 Navigation con AMCL + RF2O + EKF (odom + IMU fusionados)  -->
+  <!-- Requiere: Robot con ydlidar_launch.py + /lowstate publicado  -->
+  <!-- Incluye: go2_up, RF2O, odom_filter, lowstate_to_imu, EKF, AMCL -->
   <!--                                                               -->
-  <!-- Calibracion AMCL - comando completo para ajustar parametros:  -->
-  <!-- ros2 launch navigation_start go2_navigation_amcl.launch.xml \ -->
-  <!--   map_name:=my_house \                                         -->
-  <!--   amcl_alpha1:=0.15 amcl_alpha2:=0.15 (defaults tipo slam_toolbox) \ -->
-  <!--   amcl_min_particles:=500 amcl_max_particles:=2000 \             -->
-  <!--   amcl_max_beams:=60 amcl_update_min_a:=0.1 amcl_update_min_d:=0.1 -->
+  <!-- Instalar: sudo apt install ros-foxy-robot-localization        -->
+  <!--                                                               -->
+  <!-- ros2 launch navigation_start go2_navigation_amcl_ekf.launch.xml map_name:=my_house -->
   <!-- ============================================================ -->
 
-  <!-- Incluir go2_up: robot_state_publisher, base_link->laser_frame, joystick -->
+  <!-- Incluir go2_up: robot_state_publisher, base_link->laser_frame, joystick, joint_state_relay -->
   <include file="$(find-pkg-share surge_et_ambula)/launch/go2_up.launch.py">
     <arg name="launch_rviz2" value="false"/>
   </include>
-
-  <!-- odom_publisher: /utlidar/robot_odom -> TF odom->base_link (robot no publica TF) -->
-  <node name="odom_to_tf_broadcaster"
-        pkg="my_go2_launch"
-        exec="odom_publisher"
-        output="screen"
-        respawn="true"/>
 
   <arg name="use_sim_time" default="false"/>
 
   <arg name="map_name" default="my_house"/>
   <arg name="static_map_file" default="$(find-pkg-share surge_et_ambula)/maps/$(var map_name)/map.yaml"/>
   <arg name="prohibition_map_file" default="$(find-pkg-share surge_et_ambula)/maps/$(var map_name)/prohibition_map.yaml"/>
-  <arg name="initial_pose_x" default="0.0"/>
-  <arg name="initial_pose_y" default="0.0"/>
-  <arg name="initial_pose_yaw" default="0.0"/>
 
+  <arg name="odom_raw_topic" default="/odom_rf2o_raw"/>
+  <arg name="odom_topic" default="/odom_rf2o"/>
   <arg name="cmd_vel_topic" default="/cmd_vel"/>
   <arg name="laser_scan_topic" default="/scan"/>
   <arg name="point_cloud_topic" default="/head_rgbd_sensor/depth_registered/rectified_points"/>
@@ -51,8 +39,6 @@
   <arg name="lidar_points_threshold" default="20"/>
 
   <arg name="mvn_pln_patience" default="true"/>
-  <arg name="max_linear_speed" default="0.8" description="Velocidad lineal max (m/s). Bajar a 0.5 si la localizacion se pierde en navegacion"/>
-  <arg name="max_angular_speed" default="1.25" description="Velocidad angular max (rad/s)"/>
 
   <arg name="laser_min_x" default="0.17"/>
   <arg name="laser_max_x" default="0.50"/>
@@ -67,38 +53,80 @@
   <arg name="cloud_min_z" default="0.01"/>
   <arg name="cloud_max_z" default="1.20"/>
 
-  <!-- AMCL: defaults tipo slam_toolbox (confianza en odom como al crear mapa) -->
-  <arg name="amcl_alpha1" default="0.15" description="Ruido odom: bajo = confianza en odom (como slam_toolbox)"/>
-  <arg name="amcl_alpha2" default="0.15" description="Ruido odom: rotacion por traslacion"/>
-  <arg name="amcl_alpha3" default="0.12" description="Ruido odom: traslacion por traslacion"/>
-  <arg name="amcl_alpha4" default="0.12" description="Ruido odom: traslacion por rotacion"/>
-  <arg name="amcl_alpha5" default="0.05" description="Ruido odom: omnidireccional"/>
-  <arg name="amcl_recovery_alpha_fast" default="0.0" description="Recuperacion: 0=desactivada (como slam_toolbox)"/>
-  <arg name="amcl_recovery_alpha_slow" default="0.0" description="Recuperacion: 0=desactivada"/>
-  <arg name="amcl_transform_tolerance" default="1.0" description="Validez del TF map->odom (segundos)"/>
-  <arg name="amcl_min_particles" default="500"/>
-  <arg name="amcl_max_particles" default="2000"/>
-  <arg name="amcl_pf_err" default="0.05" description="Umbral error (slam_toolbox usa scan matching preciso)"/>
-  <arg name="amcl_max_beams" default="60" description="Beams (slam_toolbox resolution 0.05)"/>
-  <arg name="amcl_sigma_hit" default="0.2" description="Desviacion modelo gaussiano laser"/>
-  <arg name="amcl_laser_likelihood_max_dist" default="2.0" description="Distancia max inflacion obstaculos (m)"/>
-  <arg name="amcl_update_min_a" default="0.1" description="Rotacion minima para actualizar (mas frecuente)"/>
-  <arg name="amcl_update_min_d" default="0.1" description="Traslacion minima para actualizar (mas frecuente)"/>
+  <arg name="rf2o_freq" default="10.0"/>
+  <arg name="odom_filter_linear_threshold" default="0.015"/>
+  <arg name="odom_filter_angular_threshold" default="0.01"/>
+  <arg name="odom_filter_invert_x" default="false" description="True si en RViz el robot va al reves de cmd_vel"/>
+  <arg name="odom_filter_invert_yaw" default="false" description="True si en RViz el giro va al reves"/>
+  <arg name="max_linear_speed" default="0.8"/>
+  <arg name="max_angular_speed" default="1.25"/>
 
-  <!-- TF base_link -> base_footprint (mvn_pln usa base_footprint) -->
+  <!-- AMCL: config minimal tipo G1 (alpha bajos = confianza en odom del EKF) -->
+
+  <!-- RF2O: odometria desde /scan -->
+  <node name="rf2o_laser_odometry"
+        pkg="rf2o_laser_odometry"
+        exec="rf2o_laser_odometry_node"
+        output="screen"
+        respawn="true">
+    <param name="laser_scan_topic" value="$(var laser_scan_topic)"/>
+    <param name="odom_topic" value="$(var odom_raw_topic)"/>
+    <param name="publish_tf" value="false"/>
+    <param name="base_frame_id" value="base_link"/>
+    <param name="odom_frame_id" value="odom"/>
+    <param name="laser_frame_id" value="laser_frame"/>
+    <param name="init_pose_from_topic" value=""/>
+    <param name="freq" value="$(var rf2o_freq)"/>
+  </node>
+
+  <!-- Filtro zona muerta: publica /odom_rf2o pero NO TF (el EKF publica el TF) -->
+  <node name="odom_filter"
+        pkg="my_go2_launch"
+        exec="odom_filter"
+        output="screen"
+        respawn="true">
+    <param name="input_topic" value="$(var odom_raw_topic)"/>
+    <param name="output_topic" value="$(var odom_topic)"/>
+    <param name="linear_threshold" value="$(var odom_filter_linear_threshold)"/>
+    <param name="angular_threshold" value="$(var odom_filter_angular_threshold)"/>
+    <param name="publish_tf" value="false"/>
+    <param name="invert_x" value="$(var odom_filter_invert_x)"/>
+    <param name="invert_yaw" value="$(var odom_filter_invert_yaw)"/>
+  </node>
+
+  <!-- lowstate -> /imu para EKF -->
+  <node name="lowstate_to_imu"
+        pkg="my_go2_launch"
+        exec="lowstate_to_imu"
+        output="screen"
+        respawn="true">
+    <param name="lowstate_topic" value="/lowstate"/>
+    <param name="imu_topic" value="/imu"/>
+    <param name="frame_id" value="base_link"/>
+  </node>
+
+  <!-- EKF: fusiona /odom_rf2o + /imu, publica TF odom->base_link y /odometry/filtered -->
+  <node name="ekf_filter_node"
+        pkg="robot_localization"
+        exec="ekf_node"
+        output="screen"
+        respawn="true">
+    <param from="$(find-pkg-share my_go2_launch)/config/ekf_go2.yaml"/>
+  </node>
+
+  <!-- TF base_footprint -> base_link (28cm arriba: cuerpo sobre patas) -->
   <node name="base_footprint_publisher"
         pkg="tf2_ros"
         exec="static_transform_publisher"
-        args="0 0 0 0 0 0 base_link base_footprint"/>
+        args="0 0 0.28 0 0 0 base_footprint base_link"/>
 
-  <!-- Map servers: static para AMCL y map_augmenter, prohibition para capas -->
+  <!-- Map servers -->
   <node name="static_map_server"
         pkg="nav2_map_server"
         exec="map_server"
         output="screen"
         respawn="true">
     <param name="yaml_filename" value="$(var static_map_file)"/>
-    <!-- Publica en /map para AMCL; map_augmenter usa el servicio /static_map_server/map -->
   </node>
 
   <node name="prohibition_map_server"
@@ -110,39 +138,24 @@
     <remap from="/map" to="/fixed_prohibition_layer_map"/>
   </node>
 
-  <!-- AMCL: localizacion SOLO con mapa estatico /map (NO augmented_map) -->
+  <!-- AMCL: config minimal tipo G1 (alpha 0.01 = alta confianza en odom del EKF) -->
+  <!-- base_footprint para que map y odom queden al mismo nivel (suelo) -->
   <node name="amcl"
         pkg="nav2_amcl"
         exec="amcl"
         output="screen"
         respawn="true">
     <param name="base_frame_id" value="base_footprint"/>
+    <param name="scan_topic" value="$(var laser_scan_topic)"/>
     <param name="odom_frame_id" value="odom"/>
     <param name="global_frame_id" value="map"/>
-    <param name="map_topic" value="map"/>
-    <param name="scan_topic" value="scan"/>
+    <param name="use_sim_time" value="$(var use_sim_time)"/>
     <param name="set_initial_pose" value="true"/>
-    <param name="initial_pose.x" value="$(var initial_pose_x)"/>
-    <param name="initial_pose.y" value="$(var initial_pose_y)"/>
-    <param name="initial_pose.z" value="0.0"/>
-    <param name="initial_pose.yaw" value="$(var initial_pose_yaw)"/>
-    <param name="min_particles" value="$(var amcl_min_particles)"/>
-    <param name="max_particles" value="$(var amcl_max_particles)"/>
-    <param name="pf_err" value="$(var amcl_pf_err)"/>
-    <param name="laser_model_type" value="likelihood_field"/>
-    <param name="max_beams" value="$(var amcl_max_beams)"/>
-    <param name="alpha1" value="$(var amcl_alpha1)"/>
-    <param name="alpha2" value="$(var amcl_alpha2)"/>
-    <param name="alpha3" value="$(var amcl_alpha3)"/>
-    <param name="alpha4" value="$(var amcl_alpha4)"/>
-    <param name="alpha5" value="$(var amcl_alpha5)"/>
-    <param name="recovery_alpha_fast" value="$(var amcl_recovery_alpha_fast)"/>
-    <param name="recovery_alpha_slow" value="$(var amcl_recovery_alpha_slow)"/>
-    <param name="transform_tolerance" value="$(var amcl_transform_tolerance)"/>
-    <param name="sigma_hit" value="$(var amcl_sigma_hit)"/>
-    <param name="laser_likelihood_max_dist" value="$(var amcl_laser_likelihood_max_dist)"/>
-    <param name="update_min_a" value="$(var amcl_update_min_a)"/>
-    <param name="update_min_d" value="$(var amcl_update_min_d)"/>
+    <param name="alpha1" value="0.01"/>
+    <param name="alpha2" value="0.01"/>
+    <param name="alpha3" value="0.1"/>
+    <param name="alpha4" value="0.1"/>
+    <param name="map_topic" value="map"/>
   </node>
 
   <node name="lifecycle_manager_map"

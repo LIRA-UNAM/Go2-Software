@@ -64,7 +64,7 @@
     <param name="freq" value="10.0"/>
   </node>
 
-  <!-- Filtro zona muerta: ignora drift pequeno de RF2O cuando el robot esta parado -->
+  <!-- Filtro zona muerta: publica /odom_rf2o y TF odom->base_link (sin EKF) -->
   <node name="odom_filter"
         pkg="my_go2_launch"
         exec="odom_filter"
@@ -74,6 +74,7 @@
     <param name="output_topic" value="$(var odom_topic)"/>
     <param name="linear_threshold" value="0.015"/>
     <param name="angular_threshold" value="0.02"/>
+    <param name="publish_tf" value="true"/>
   </node>
 
   <!-- TF base_link -> base_footprint (Go2 no lo tiene en URDF, EMCL2 lo requiere) -->
@@ -134,7 +135,7 @@
         respawn="true">
     <param name="num_particles" value="1000"/>
     <param name="odom_frame_id" value="odom"/>
-    <param name="base_frame_id" value="base_link"/>
+    <param name="base_frame_id" value="base_footprint"/>
     <param name="footprint_frame_id" value="base_footprint"/>
     <param name="global_frame_id" value="map"/>
     <!-- Mayor ruido de odom: reduce sensibilidad al drift de RF2O cuando el robot esta parado -->
