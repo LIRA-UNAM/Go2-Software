@@ -56,8 +56,8 @@
   <arg name="rf2o_freq" default="10.0"/>
   <arg name="odom_filter_linear_threshold" default="0.015"/>
   <arg name="odom_filter_angular_threshold" default="0.01"/>
-  <arg name="odom_filter_invert_x" default="false" description="True si en RViz el robot va al reves de cmd_vel"/>
-  <arg name="odom_filter_invert_yaw" default="false" description="True si en RViz el giro va al reves"/>
+  <arg name="odom_filter_invert_x" default="true" description="True si en RViz el robot va al reves de cmd_vel"/>
+  <arg name="odom_filter_invert_yaw" default="true" description="True si en RViz el giro va al reves"/>
   <arg name="max_linear_speed" default="0.8"/>
   <arg name="max_angular_speed" default="1.25"/>
 

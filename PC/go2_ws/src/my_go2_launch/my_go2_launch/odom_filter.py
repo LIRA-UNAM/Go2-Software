@@ -24,8 +24,8 @@ class OdomFilterNode(Node):
         self.declare_parameter("base_frame_id", "base_footprint")  # odom/footprint al nivel suelo
         self.declare_parameter("base_link_height", 0.0)  # base_footprint en z=0 (nivel patas)
         self.declare_parameter("publish_tf", False)  # True solo cuando no hay EKF (ej. go2_navigation_amcl_rf2o)
-        self.declare_parameter("invert_x", False)  # True si en RViz el robot va al reves de cmd_vel (RF2O+laser 180°)
-        self.declare_parameter("invert_yaw", False)  # True si en RViz el giro va al reves
+        self.declare_parameter("invert_x", True)  # True si en RViz el robot va al reves de cmd_vel (RF2O+laser 180°)
+        self.declare_parameter("invert_yaw", True)  # True si en RViz el giro va al reves
 
         self.input_topic = self.get_parameter("input_topic").value
         self.output_topic = self.get_parameter("output_topic").value

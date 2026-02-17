@@ -75,6 +75,8 @@
     <param name="linear_threshold" value="0.015"/>
     <param name="angular_threshold" value="0.02"/>
     <param name="publish_tf" value="true"/>
+    <param name="invert_x" value="true"/>
+    <param name="invert_yaw" value="true"/>
   </node>
 
   <!-- TF base_link -> base_footprint (Go2 no lo tiene en URDF, EMCL2 lo requiere) -->

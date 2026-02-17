@@ -102,6 +102,10 @@ void signal_handler(int signal){
 DogBaseNode::DogBaseNode():
 	Node("dog_base_node"), bodyHeight(0){
 	this->declare_parameter("publish_tf", false);
+	this->declare_parameter("gait_type", 2);           // 0=classic, 1=flat, 2=economic
+	this->declare_parameter("foot_raise_height", 0.04); // Bajo = menos salto (min ~0.04)
+	this->declare_parameter("speed_level", 0);          // 0 o -1 = pasos mas cortos
+	this->declare_parameter("continuous_gait", true);  // true=run (pasos cortos), false=walk (pasos grandes)
 	rclcpp::Parameter p;
 	if (this->get_parameter("publish_tf", p)) {
 		if (p.get_type() == rclcpp::ParameterType::PARAMETER_BOOL) {
@@ -131,8 +135,17 @@ DogBaseNode::DogBaseNode():
 
 
 void DogBaseNode::initGo2(){
-	sc->ContinuousGait(false);
-	RCLCPP_INFO(this->get_logger(), "Dogbase node running. Standing up...");
+	bool continuous = true;
+	try {
+		auto p = this->get_parameter("continuous_gait");
+		if (p.get_type() == rclcpp::ParameterType::PARAMETER_BOOL)
+			continuous = p.as_bool();
+		else if (p.get_type() == rclcpp::ParameterType::PARAMETER_STRING)
+			continuous = (p.as_string() == "true" || p.as_string() == "1");
+	} catch (...) {}
+	sc->ContinuousGait(continuous);
+	RCLCPP_INFO(this->get_logger(), "Dogbase node running. Standing up... (continuous_gait=%s)",
+	            continuous ? "true" : "false");
 	sc->RiseSit();
 	std::this_thread::sleep_for(std::chrono::milliseconds(500));
 	sc->StandUp();
@@ -140,9 +153,19 @@ void DogBaseNode::initGo2(){
 		std::this_thread::sleep_for(std::chrono::milliseconds(500));
 		sc->BalanceStand();
 	}
+	// Marcha suave: pasos cortos, poco salto (evita running que salta mucho)
+	int gait_type = this->get_parameter("gait_type").as_int();
+	float foot_raise = this->get_parameter("foot_raise_height").as_double();
+	int speed_level = this->get_parameter("speed_level").as_int();
+	sc->SwitchGait(gait_type);
+	std::this_thread::sleep_for(std::chrono::milliseconds(200));
+	sc->FootRaiseHeight(foot_raise);
+	std::this_thread::sleep_for(std::chrono::milliseconds(200));
+	sc->SpeedLevel(speed_level);
+	std::this_thread::sleep_for(std::chrono::milliseconds(200));
 	setBodyHeight(bodyHeight);
-	// -0.18~0.03
-	RCLCPP_INFO(this->get_logger(), "Dogbase ready");
+	RCLCPP_INFO(this->get_logger(), "Dogbase ready (gait=%d, foot_raise=%.2f, speed=%d, continuous=%s)",
+	            gait_type, foot_raise, speed_level, continuous ? "true" : "false");
 	status = DogStatus::StandReady;
 }
 
@@ -230,6 +253,21 @@ void DogBaseNode::handleTrick(const StringPtr msg){
 	if(trick == "bodyDown") setBodyHeight(bodyHeight - 0.005);
 	if((trick == "bodyHeight") && (match.size() > 2))
 		setBodyHeight(std::stof(match[2]));
+	if((trick == "gaitType") && (match.size() > 2)){
+		int g = std::stoi(match[2]);
+		sc->SwitchGait(g);
+		RCLCPP_INFO(this->get_logger(), "Gait type set to %d", g);
+	}
+	if((trick == "footRaise") && (match.size() > 2)){
+		float h = std::stof(match[2]);
+		sc->FootRaiseHeight(h);
+		RCLCPP_INFO(this->get_logger(), "Foot raise height set to %.3f", h);
+	}
+	if((trick == "speedLevel") && (match.size() > 2)){
+		int s = std::stoi(match[2]);
+		sc->SpeedLevel(s);
+		RCLCPP_INFO(this->get_logger(), "Speed level set to %d", s);
+	}
 }
 
 void DogBaseNode::handleTwist(const TwistPtr msg){
