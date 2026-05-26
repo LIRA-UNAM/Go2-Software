@@ -1,4 +1,5 @@
 #docker pull ghcr.io/jdgag0/unitree_project/go2:2.0
+#run docker container: docker compose up -d --build
 version: "3.9"
 
 services:
@@ -15,7 +16,7 @@ services:
       - NVIDIA_VISIBLE_DEVICES=all
     volumes:
       - /tmp/.X11-unix:/tmp/.X11-unix
-      - /home/joel/unitree:/home/unitree  # Carpeta persistente única
+      - /home/joel/unitree:/home/unitree  # Carpeta persistente, cambiar personalizando la ruta.
       - /dev:/dev
       - /etc/hosts:/etc/hosts
       - ${XDG_RUNTIME_DIR}/pulse:/run/user/1000/pulse  # monta donde realmente está el socket
